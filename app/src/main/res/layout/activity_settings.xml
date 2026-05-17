@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A1A2E"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="Settings"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/radius_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:layout_marginTop="32dp"
+        android:text="Detection Radius: 100m"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"/>
+
+    <SeekBar
+        android:id="@+id/radius_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/radius_text"
+        android:layout_marginTop="8dp"
+        android:progressTint="#E94560"
+        android:thumbTint="#E94560"/>
+
+    <TextView
+        android:id="@+id/notifications_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/radius_seekbar"
+        android:layout_marginTop="32dp"
+        android:text="Enable Notifications"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"/>
+
+    <Switch
+        android:id="@+id/notifications_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/radius_seekbar"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="32dp"
+        android:checked="true"/>
+
+    <TextView
+        android:id="@+id/dark_mode_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/notifications_label"
+        android:layout_marginTop="24dp"
+        android:text="Dark Mode"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"/>
+
+    <Switch
+        android:id="@+id/dark_mode_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/notifications_switch"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="24dp"
+        android:checked="true"/>
+
+    <Button
+        android:id="@+id/logout_btn"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/button_background"
+        android:text="LOGOUT"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"/>
+
+</RelativeLayout>
