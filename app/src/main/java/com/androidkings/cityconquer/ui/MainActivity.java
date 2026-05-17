@@ -7,6 +7,8 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.androidkings.cityconquer.util.DataSeeder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.androidkings.cityconquer.R;
 import com.androidkings.cityconquer.model.City;
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         citiesRecycler = findViewById(R.id.cities_recycler);
         citiesRecycler.setLayoutManager(new LinearLayoutManager(this));
 
+        DataSeeder.seedData();
         loadCities();
     }
 
