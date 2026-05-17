@@ -1,0 +1,99 @@
+package com.androidkings.cityconquer.ui.fragment;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.androidkings.cityconquer.R;
+import com.androidkings.cityconquer.model.User;
+import java.util.ArrayList;
+import java.util.List;
+
+public class FriendsFragment extends Fragment {
+
+    private EditText friendUsernameInput;
+    private Button addFriendBtn;
+    private RecyclerView friendsRecycler;
+    private FirebaseFirestore db;
+    private String currentUserId;
+    private List<User> friendsList = new ArrayList<>();
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_friends, container, false);
+        db = FirebaseFirestore.getInstance();
+        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        friendUsernameInput = view.findViewById(R.id.friend_username_input);
+        addFriendBtn = view.findViewById(R.id.add_friend_btn);
+        friendsRecycler = view.findViewById(R.id.friends_recycler);
+        friendsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        addFriendBtn.setOnClickListener(v -> addFriend());
+        loadFriends();
+        return view;
+    }
+
+    private void addFriend() {
+        String username = friendUsernameInput.getText().toString().trim();
+        if (TextUtils.isEmpty(username)) {
+            Toast.makeText(getContext(), "Enter a username!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        db.collection("users")
+                .whereEqualTo("username", username)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        Toast.makeText(getContext(), "User not found!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    String friendId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                    if (friendId.equals(currentUserId)) {
+                        Toast.makeText(getContext(), "You can't add yourself!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    db.collection("users").document(currentUserId)
+                            .update("friends", FieldValue.arrayUnion(friendId))
+                            .addOnSuccessListener(unused -> {
+                                Toast.makeText(getContext(), "Friend added! ✅", Toast.LENGTH_SHORT).show();
+                                friendUsernameInput.setText("");
+                                loadFriends();
+                            });
+                });
+    }
+
+    private void loadFriends() {
+        db.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    List<String> friendIds = (List<String>) documentSnapshot.get("friends");
+                    if (friendIds == null || friendIds.isEmpty()) return;
+                    friendsList.clear();
+                    for (String friendId : friendIds) {
+                        db.collection("users").document(friendId)
+                                .get()
+                                .addOnSuccessListener(friendDoc -> {
+                                    User friend = friendDoc.toObject(User.class);
+                                    if (friend != null) {
+                                        friend.setId(friendDoc.getId());
+                                        friendsList.add(friend);
+                                    }
+                                });
+                    }
+                });
+    }
+}

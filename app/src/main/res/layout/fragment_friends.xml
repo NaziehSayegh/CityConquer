@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A1A2E"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="👥 Friends"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:id="@+id/friend_username_input"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_below="@id/title"
+        android:layout_marginTop="24dp"
+        android:layout_toStartOf="@+id/add_friend_btn"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/input_background"
+        android:hint="Enter username"
+        android:paddingStart="16dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#888888"/>
+
+    <Button
+        android:id="@+id/add_friend_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="56dp"
+        android:layout_below="@id/title"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/button_background"
+        android:text="Add"
+        android:textColor="#FFFFFF"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"/>
+
+    <TextView
+        android:id="@+id/friends_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/friend_username_input"
+        android:layout_marginTop="24dp"
+        android:text="My Friends"
+        android:textColor="#E94560"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/friends_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/friends_label"
+        android:layout_marginTop="8dp"/>
+
+</RelativeLayout>

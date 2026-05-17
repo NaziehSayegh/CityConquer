@@ -2,53 +2,62 @@ package com.androidkings.cityconquer.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.androidkings.cityconquer.util.DataSeeder;
-import com.google.firebase.firestore.FirebaseFirestore;
+import androidx.fragment.app.Fragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.androidkings.cityconquer.R;
-import com.androidkings.cityconquer.model.City;
-import java.util.ArrayList;
-import java.util.List;
+import com.androidkings.cityconquer.ui.fragment.CitiesFragment;
+import com.androidkings.cityconquer.ui.fragment.FriendsFragment;
+import com.androidkings.cityconquer.ui.fragment.LeaderboardFragment;
+import com.androidkings.cityconquer.ui.fragment.MapFragment;
+import com.androidkings.cityconquer.ui.fragment.ProfileFragment;
+import com.androidkings.cityconquer.util.DataSeeder;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView citiesRecycler;
-    private FirebaseFirestore db;
-    private List<City> cities = new ArrayList<>();
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        db = FirebaseFirestore.getInstance();
-        citiesRecycler = findViewById(R.id.cities_recycler);
-        citiesRecycler.setLayoutManager(new LinearLayoutManager(this));
-
         DataSeeder.seedData();
-        loadCities();
+
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnItemSelectedListener(this::onNavItemSelected);
+
+        // Show Leaderboard first
+        loadFragment(new LeaderboardFragment());
     }
 
-    private void loadCities() {
-        db.collection("cities")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    cities.clear();
-                    for (var doc : queryDocumentSnapshots) {
-                        City city = doc.toObject(City.class);
-                        city.setId(doc.getId());
-                        cities.add(city);
-                    }
-                });
+    private boolean onNavItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.nav_leaderboard) {
+            loadFragment(new LeaderboardFragment());
+        } else if (id == R.id.nav_map) {
+            loadFragment(new MapFragment());
+        } else if (id == R.id.nav_cities) {
+            loadFragment(new CitiesFragment());
+        } else if (id == R.id.nav_friends) {
+            loadFragment(new FriendsFragment());
+        } else if (id == R.id.nav_profile) {
+            loadFragment(new ProfileFragment());
+        }
+        return true;
+    }
+
+    private void loadFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(android.view.Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
@@ -56,13 +65,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.menu_profile) {
-            startActivity(new Intent(this, ProfileActivity.class));
-            return true;
-        } else if (id == R.id.menu_friends) {
-            startActivity(new Intent(this, FriendsActivity.class));
-            return true;
-        } else if (id == R.id.menu_settings) {
+        if (id == R.id.menu_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
