@@ -73,6 +73,11 @@
             android:exported="false"
             android:screenOrientation="portrait"/>
 
+        <activity
+            android:name=".ui.AboutActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
         <service
             android:name=".service.LocationTrackingService"
             android:exported="false"
