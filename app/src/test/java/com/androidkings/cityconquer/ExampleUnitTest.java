@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer;
+package com.mohammad_nazieh_amro.cityconquer;
 
 import org.junit.Test;
 

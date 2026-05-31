@@ -1,11 +1,11 @@
-package com.androidkings.cityconquer.ui;
+package com.mohammad_nazieh_amro.cityconquer.ui;
 
 import android.os.Bundle;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.androidkings.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.R;
 
 public class ProfileActivity extends AppCompatActivity {
 

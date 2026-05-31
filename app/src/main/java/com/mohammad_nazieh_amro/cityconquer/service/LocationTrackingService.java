@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.service;
+package com.mohammad_nazieh_amro.cityconquer.service;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -16,7 +16,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
-import com.androidkings.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.R;
 
 public class LocationTrackingService extends Service {
 

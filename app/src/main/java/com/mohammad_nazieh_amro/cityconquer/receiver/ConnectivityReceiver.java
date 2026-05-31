@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.receiver;
+package com.mohammad_nazieh_amro.cityconquer.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

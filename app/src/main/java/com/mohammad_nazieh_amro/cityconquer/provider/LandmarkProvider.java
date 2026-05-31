@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.provider;
+package com.mohammad_nazieh_amro.cityconquer.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 
 public class LandmarkProvider extends ContentProvider {
 
-    private static final String AUTHORITY = "com.androidkings.cityconquer.provider";
+    private static final String AUTHORITY = "com.mohammad_nazieh_amro.cityconquer.provider";
     private static final String LANDMARKS_PATH = "landmarks";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + LANDMARKS_PATH);
 

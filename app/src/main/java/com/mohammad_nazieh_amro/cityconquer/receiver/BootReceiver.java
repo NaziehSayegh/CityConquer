@@ -1,9 +1,9 @@
-package com.androidkings.cityconquer.receiver;
+package com.mohammad_nazieh_amro.cityconquer.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import com.androidkings.cityconquer.service.LocationTrackingService;
+import com.mohammad_nazieh_amro.cityconquer.service.LocationTrackingService;
 
 public class BootReceiver extends BroadcastReceiver {
 

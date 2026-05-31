@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.ui.auth;
+package com.mohammad_nazieh_amro.cityconquer.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,8 +10,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.androidkings.cityconquer.R;
-import com.androidkings.cityconquer.ui.MainActivity;
+import com.mohammad_nazieh_amro.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.ui.MainActivity;
 
 public class AuthActivity extends AppCompatActivity {
 

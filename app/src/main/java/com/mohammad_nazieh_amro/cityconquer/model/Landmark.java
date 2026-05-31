@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.model;
+package com.mohammad_nazieh_amro.cityconquer.model;
 
 public class Landmark {
     private String id;

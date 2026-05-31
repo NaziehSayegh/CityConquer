@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.ui;
+package com.mohammad_nazieh_amro.cityconquer.ui;
 
 import android.Manifest;
 import android.content.Intent;
@@ -24,7 +24,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.androidkings.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.R;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -115,7 +115,7 @@ public class LandmarkActivity extends AppCompatActivity {
         }
         if (photoFile != null) {
             photoUri = FileProvider.getUriForFile(this,
-                    "com.androidkings.cityconquer.fileprovider", photoFile);
+                    "com.mohammad_nazieh_amro.cityconquer.fileprovider", photoFile);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
             startActivityForResult(takePictureIntent, REQUEST_CAMERA);
         }

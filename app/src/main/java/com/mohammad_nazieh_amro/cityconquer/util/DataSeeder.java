@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.util;
+package com.mohammad_nazieh_amro.cityconquer.util;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.ui;
+package com.mohammad_nazieh_amro.cityconquer.ui;
 
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.androidkings.cityconquer.R;
-import com.androidkings.cityconquer.model.User;
+import com.mohammad_nazieh_amro.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.model.User;
 import java.util.ArrayList;
 import java.util.List;
 

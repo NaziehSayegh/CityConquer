@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.ui;
+package com.mohammad_nazieh_amro.cityconquer.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,13 +7,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.androidkings.cityconquer.R;
-import com.androidkings.cityconquer.ui.fragment.CitiesFragment;
-import com.androidkings.cityconquer.ui.fragment.FriendsFragment;
-import com.androidkings.cityconquer.ui.fragment.LeaderboardFragment;
-import com.androidkings.cityconquer.ui.fragment.MapFragment;
-import com.androidkings.cityconquer.ui.fragment.ProfileFragment;
-import com.androidkings.cityconquer.util.DataSeeder;
+import com.mohammad_nazieh_amro.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.ui.fragment.CitiesFragment;
+import com.mohammad_nazieh_amro.cityconquer.ui.fragment.FriendsFragment;
+import com.mohammad_nazieh_amro.cityconquer.ui.fragment.LeaderboardFragment;
+import com.mohammad_nazieh_amro.cityconquer.ui.fragment.MapFragment;
+import com.mohammad_nazieh_amro.cityconquer.ui.fragment.ProfileFragment;
+import com.mohammad_nazieh_amro.cityconquer.util.DataSeeder;
 
 public class MainActivity extends AppCompatActivity {
 

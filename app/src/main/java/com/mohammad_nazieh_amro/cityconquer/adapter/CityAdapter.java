@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.adapter;
+package com.mohammad_nazieh_amro.cityconquer.adapter;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.androidkings.cityconquer.R;
-import com.androidkings.cityconquer.model.City;
-import com.androidkings.cityconquer.ui.CityActivity;
+import com.mohammad_nazieh_amro.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.model.City;
+import com.mohammad_nazieh_amro.cityconquer.ui.CityActivity;
 import java.util.List;
 
 public class CityAdapter extends RecyclerView.Adapter<CityAdapter.CityViewHolder> {

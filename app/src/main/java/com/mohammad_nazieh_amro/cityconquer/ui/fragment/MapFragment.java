@@ -1,4 +1,4 @@
-package com.androidkings.cityconquer.ui.fragment;
+package com.mohammad_nazieh_amro.cityconquer.ui.fragment;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -17,7 +17,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.androidkings.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.R;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
