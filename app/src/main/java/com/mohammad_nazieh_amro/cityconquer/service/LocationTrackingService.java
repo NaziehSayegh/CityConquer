@@ -115,6 +115,11 @@ public class LocationTrackingService extends Service {
         double lat = location.getLatitude();
         double lng = location.getLongitude();
 
+        android.content.SharedPreferences prefs = getSharedPreferences("CityConquerPrefs", MODE_PRIVATE);
+        boolean cityAlertsEnabled = prefs.getBoolean("city_alerts", true);
+        boolean landmarkAlertsEnabled = prefs.getBoolean("landmark_alerts", true);
+        int captureRadius = prefs.getInt("capture_radius", 100);
+
         String currentCityId = null;
         String currentCityName = null;
 
@@ -149,17 +154,24 @@ public class LocationTrackingService extends Service {
         }
 
         if (currentCityId != null) {
-            if (!currentCityName.equals(lastCityNotificationName)) {
-                sendCityNotification(currentCityName);
-                lastCityNotificationName = currentCityName;
+            if (cityAlertsEnabled) {
+                if (!currentCityName.equals(lastCityNotificationName)) {
+                    sendCityNotification(currentCityName);
+                    lastCityNotificationName = currentCityName;
+                }
+            } else {
+                lastCityNotificationName = null;
             }
-            checkNearbyLandmarks(location, currentCityId);
+            
+            if (landmarkAlertsEnabled) {
+                checkNearbyLandmarks(location, currentCityId, captureRadius);
+            }
         } else {
             lastCityNotificationName = null;
         }
     }
 
-    private void checkNearbyLandmarks(Location userLocation, String cityId) {
+    private void checkNearbyLandmarks(Location userLocation, String cityId, int captureRadius) {
         synchronized (cachedLandmarks) {
             for (Landmark landmark : cachedLandmarks) {
                 if (landmark.getCityId().equals(cityId)) {
@@ -173,13 +185,14 @@ public class LocationTrackingService extends Service {
 
                     float distance = results[0];
                     String landmarkId = landmark.getId();
+                    float alertRadius = captureRadius * 2; // Trigger nearby alerts when within 2x capture radius
 
-                    if (distance <= 200) {
+                    if (distance <= alertRadius) {
                         if (!notifiedLandmarks.contains(landmarkId)) {
                             sendLandmarkNotification(landmark.getName(), (int) distance);
                             notifiedLandmarks.add(landmarkId);
                         }
-                    } else if (distance > 250) {
+                    } else if (distance > (alertRadius + 50)) {
                         notifiedLandmarks.remove(landmarkId);
                     }
                 }

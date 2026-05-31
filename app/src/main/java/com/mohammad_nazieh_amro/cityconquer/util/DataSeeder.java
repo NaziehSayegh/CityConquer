@@ -20,6 +20,7 @@ public class DataSeeder {
                     } else {
                         android.util.Log.d("SEEDER", "Database already seeded. Checking Ramallah specifically...");
                         seedRamallahIfNeeded();
+                        seedFakeUsers();
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -39,6 +40,7 @@ public class DataSeeder {
         seedNetanya();
         seedBeerSheva();
         seedRamallah();
+        seedFakeUsers();
         android.util.Log.d("SEEDER", "Seeding calls initiated!");
     }
 
@@ -398,6 +400,32 @@ public class DataSeeder {
                 .addOnFailureListener(e -> {
                     android.util.Log.e("SEEDER", "Ramallah FAILED: " + e.getMessage());
                 });
+    }
+
+    // ==================== FAKE USERS ====================
+    private static void seedFakeUsers() {
+        android.util.Log.d("SEEDER", "Seeding fake users for leaderboard and friends testing...");
+        createFakeUser("user_mike", "explorer_mike", "mike@conquer.com", 1200, 5);
+        createFakeUser("user_jane", "jane_doe", "jane@conquer.com", 950, 4);
+        createFakeUser("user_leo", "nomad_leo", "leo@conquer.com", 600, 3);
+        createFakeUser("user_sarah", "wanderer_sarah", "sarah@conquer.com", 300, 2);
+        createFakeUser("user_john", "roamer_john", "john@conquer.com", 100, 1);
+    }
+
+    private static void createFakeUser(String userId, String username, String email, int xp, int level) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("username", username);
+        user.put("email", email);
+        user.put("totalXP", xp);
+        user.put("level", level);
+        user.put("friends", new java.util.ArrayList<>());
+
+        db.collection("users").document(userId)
+                .set(user)
+                .addOnSuccessListener(unused ->
+                        android.util.Log.d("SEEDER", "Fake user " + username + " seeded!"))
+                .addOnFailureListener(e ->
+                        android.util.Log.e("SEEDER", "Failed to seed fake user " + username + ": " + e.getMessage()));
     }
 
     // ==================== HELPER ====================

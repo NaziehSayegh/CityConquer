@@ -37,7 +37,7 @@ public class LandmarkActivity extends AppCompatActivity {
 
     private static final int REQUEST_CAMERA = 100;
     private static final int REQUEST_LOCATION = 101;
-    private static final double MAX_DISTANCE_METERS = 100.0;
+    private double maxDistanceMeters = 100.0;
 
     private TextView landmarkName, landmarkDescription, statusText;
     private ImageView landmarkImage;
@@ -60,6 +60,9 @@ public class LandmarkActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        maxDistanceMeters = getSharedPreferences("CityConquerPrefs", MODE_PRIVATE)
+                .getInt("capture_radius", 100);
 
         landmarkName = findViewById(R.id.landmark_name);
         landmarkDescription = findViewById(R.id.landmark_description);
@@ -121,7 +124,7 @@ public class LandmarkActivity extends AppCompatActivity {
             Location.distanceBetween(location.getLatitude(), location.getLongitude(),
                     landmarkLat, landmarkLng, results);
 
-            if (results[0] <= MAX_DISTANCE_METERS) {
+            if (results[0] <= maxDistanceMeters) {
                 statusText.setText("✅ You're here! Take a photo to conquer!");
                 openCamera();
             } else {
