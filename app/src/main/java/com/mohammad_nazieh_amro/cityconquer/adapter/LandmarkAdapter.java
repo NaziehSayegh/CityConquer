@@ -38,10 +38,12 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.ViewHo
         holder.xp.setText("+" + landmark.getXp() + " XP");
 
         if (landmark.isConquered()) {
-            holder.status.setText("✅ Conquered");
+            holder.statusIcon.setText("✅");
+            holder.status.setText("Conquered · " + landmark.getXp() + " XP");
             holder.status.setTextColor(0xFF00BCD4);
         } else {
-            holder.status.setText("🔒 Not conquered");
+            holder.statusIcon.setText("🔒");
+            holder.status.setText("Not conquered");
             holder.status.setTextColor(0xFF888888);
         }
 
@@ -68,7 +70,7 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, description, xp, status;
+        TextView name, description, xp, status, statusIcon;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -76,6 +78,7 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.ViewHo
             description = itemView.findViewById(R.id.landmark_description);
             xp = itemView.findViewById(R.id.landmark_xp);
             status = itemView.findViewById(R.id.landmark_status);
+            statusIcon = itemView.findViewById(R.id.landmark_status_icon);
         }
     }
 }

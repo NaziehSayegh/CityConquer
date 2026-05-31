@@ -1,26 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1A1A2E">
+    android:background="@color/primary_dark"
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp"
-        android:text="🏆 Leaderboard"
-        android:textColor="#E94560"
-        android:textSize="28sp"
+        android:padding="16dp"
+        android:text="🏆 Global Leaderboard"
+        android:textColor="@color/gold"
+        android:textSize="22sp"
         android:textStyle="bold"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/leaderboard_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/title"
-        android:layout_marginTop="16dp"
         android:padding="8dp"/>
 
-</RelativeLayout>
+</LinearLayout>

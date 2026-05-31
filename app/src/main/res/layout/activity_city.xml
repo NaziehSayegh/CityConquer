@@ -1,50 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1A1A2E">
+    android:background="@color/primary_dark"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/primary"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/city_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="City"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/progress_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="#1A3A4A"
+            android:padding="8dp"
+            android:text="0/5 conquered"
+            android:textColor="@color/accent"
+            android:textSize="13sp"/>
+
+    </RelativeLayout>
 
     <TextView
-        android:id="@+id/city_name"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp"
-        android:text="City Name"
-        android:textColor="#FFFFFF"
-        android:textSize="28sp"
-        android:textStyle="bold"/>
-
-    <TextView
-        android:id="@+id/progress_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/city_name"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:text="0/0 Conquered"
-        android:textColor="#E94560"
-        android:textSize="16sp"/>
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:text="city progress"
+        android:textColor="@color/grey"
+        android:textSize="12sp"/>
 
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="12dp"
-        android:layout_below="@id/progress_text"
-        android:layout_marginTop="12dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="4dp"
         android:max="100"
         android:progress="0"
-        android:progressTint="#E94560"/>
+        android:progressTint="@color/accent"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/landmarks_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/progress_bar"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:padding="8dp"/>
 
-</RelativeLayout>
+</LinearLayout>

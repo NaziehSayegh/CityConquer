@@ -1,15 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
     <style name="Base.Theme.CityConquer" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/primary_dark</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:navigationBarColor">@color/primary</item>
     </style>
 
-    <style name="Theme.CityConquer" parent="Base.Theme.CityConquer" />
+    <style name="Theme.CityConquer" parent="Base.Theme.CityConquer"/>
 
     <style name="Theme.CityConquer.Splash" parent="Theme.CityConquer">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:statusBarColor">#1A1A2E</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
     </style>
+
 </resources>

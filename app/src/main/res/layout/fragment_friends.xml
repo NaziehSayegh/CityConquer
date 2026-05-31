@@ -1,64 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1A1A2E"
-    android:padding="16dp">
+    android:background="@color/primary_dark"
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:text="👥 Friends"
-        android:textColor="#FFFFFF"
-        android:textSize="28sp"
-        android:textStyle="bold"/>
-
-    <EditText
-        android:id="@+id/friend_username_input"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_below="@id/title"
-        android:layout_marginTop="24dp"
-        android:layout_toStartOf="@+id/add_friend_btn"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/input_background"
-        android:hint="Enter username"
-        android:paddingStart="16dp"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#888888"/>
+        android:background="@color/primary"
+        android:padding="8dp">
 
-    <Button
-        android:id="@+id/add_friend_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="56dp"
-        android:layout_below="@id/title"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="24dp"
-        android:background="@drawable/button_background"
-        android:text="Add"
-        android:textColor="#FFFFFF"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="Friends"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/add_friend_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="+ Add"
+            android:textColor="@color/accent"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="8dp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        android:padding="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
+
+        <EditText
+            android:id="@+id/friend_username_input"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_toStartOf="@+id/add_friend_btn"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/input_background"
+            android:hint="Search friends..."
+            android:paddingStart="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/grey"/>
+
+        <Button
+            android:id="@+id/add_friend_btn"
+            android:layout_width="80dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/button_background"
+            android:text="Add"
+            android:textColor="@color/white"/>
+
+    </RelativeLayout>
 
     <TextView
-        android:id="@+id/friends_label"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/friend_username_input"
-        android:layout_marginTop="24dp"
+        android:padding="16dp"
         android:text="My Friends"
-        android:textColor="#E94560"
-        android:textSize="18sp"
+        android:textColor="@color/accent"
+        android:textSize="16sp"
         android:textStyle="bold"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/friends_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/friends_label"
-        android:layout_marginTop="8dp"/>
+        android:padding="8dp"/>
 
-</RelativeLayout>
+</LinearLayout>
