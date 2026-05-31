@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.androidkings.cityconquer">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -97,12 +96,12 @@
 
         <provider
             android:name=".provider.LandmarkProvider"
-            android:authorities="com.androidkings.cityconquer.provider"
+            android:authorities="com.mohammad_nazieh_amro.cityconquer.provider"
             android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.androidkings.cityconquer.fileprovider"
+            android:authorities="com.mohammad_nazieh_amro.cityconquer.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

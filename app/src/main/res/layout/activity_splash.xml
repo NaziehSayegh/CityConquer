@@ -2,15 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1A1A2E">
+    android:background="#0D1B2A">
 
     <ImageView
         android:id="@+id/logo"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="180dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:layout_marginTop="160dp"
+        android:src="@drawable/logo"/>
 
     <TextView
         android:id="@+id/app_name"
@@ -18,9 +18,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/logo"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:text="CityConquer"
-        android:textColor="#E94560"
+        android:textColor="#FFFFFF"
         android:textSize="36sp"
         android:textStyle="bold"/>
 
@@ -31,19 +31,93 @@
         android:layout_below="@id/app_name"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
-        android:text="Explore. Conquer. Compete."
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"/>
+        android:text="EXPLORE · CAPTURE · CONQUER"
+        android:textColor="#00BCD4"
+        android:textSize="14sp"
+        android:letterSpacing="0.1"/>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="60dp"
+        android:layout_height="2dp"
+        android:layout_below="@id/tagline"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp"
+        android:background="#00BCD4"/>
+
+    <LinearLayout
+        android:id="@+id/team_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/divider"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mohammad Enabi · 213989577"
+            android:textColor="#AAAAAA"
+            android:textSize="13sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nazieh Sayegh · 325870392"
+            android:textColor="#AAAAAA"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Amro Tarteer · 326697109"
+            android:textColor="#AAAAAA"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"/>
+
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/team_names"
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/team_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:text="28.06.2026"
+        android:textColor="#00BCD4"
+        android:textSize="13sp"/>
+
+    <LinearLayout
+        android:id="@+id/dots_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="40dp"
-        android:text="Team AndroidKings | 2025"
-        android:textColor="#888888"
-        android:textSize="12sp"/>
+        android:layout_marginBottom="48dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@drawable/dot_active"
+            android:layout_marginEnd="6dp"/>
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@drawable/dot_inactive"
+            android:layout_marginEnd="6dp"/>
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@drawable/dot_inactive"/>
+
+    </LinearLayout>
 
 </RelativeLayout>
