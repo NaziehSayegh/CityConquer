@@ -22,7 +22,8 @@ import com.mohammad_nazieh_amro.cityconquer.model.Landmark;
 
 public class LocationTrackingService extends Service {
 
-    private static final String CHANNEL_ID = "CityConquerLocation";
+    private static final String CHANNEL_FOREGROUND = "CityConquerForeground";
+    private static final String CHANNEL_ALERTS = "CityConquerAlerts";
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
 
@@ -202,7 +203,7 @@ public class LocationTrackingService extends Service {
 
     private void sendLandmarkNotification(String landmarkName, int distance) {
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ALERTS)
                 .setContentTitle("📍 " + landmarkName + " nearby!")
                 .setContentText("You are " + distance + "m away. Go conquer it! 🏆")
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -214,7 +215,7 @@ public class LocationTrackingService extends Service {
 
     private void sendCityNotification(String cityName) {
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ALERTS)
                 .setContentTitle("You're in " + cityName + "! 🏛️")
                 .setContentText("Landmarks nearby to conquer!")
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -224,7 +225,7 @@ public class LocationTrackingService extends Service {
     }
 
     private Notification buildNotification() {
-        return new NotificationCompat.Builder(this, CHANNEL_ID)
+        return new NotificationCompat.Builder(this, CHANNEL_FOREGROUND)
                 .setContentTitle("CityConquer")
                 .setContentText("Tracking your location...")
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -232,11 +233,20 @@ public class LocationTrackingService extends Service {
     }
 
     private void createNotificationChannel() {
-        NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID, "Location Tracking",
-                NotificationManager.IMPORTANCE_LOW);
         NotificationManager manager = getSystemService(NotificationManager.class);
-        manager.createNotificationChannel(channel);
+        if (manager != null) {
+            NotificationChannel fgChannel = new NotificationChannel(
+                    CHANNEL_FOREGROUND, "Background Tracking",
+                    NotificationManager.IMPORTANCE_LOW);
+            manager.createNotificationChannel(fgChannel);
+
+            NotificationChannel alertsChannel = new NotificationChannel(
+                    CHANNEL_ALERTS, "Proximity Alerts",
+                    NotificationManager.IMPORTANCE_HIGH);
+            alertsChannel.enableLights(true);
+            alertsChannel.enableVibration(true);
+            manager.createNotificationChannel(alertsChannel);
+        }
     }
 
     @Override
