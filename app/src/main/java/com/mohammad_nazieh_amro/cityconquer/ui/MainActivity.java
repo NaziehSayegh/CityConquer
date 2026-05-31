@@ -135,13 +135,29 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void checkLocationPermissionAndStartService() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        java.util.List<String> permissionsToRequest = new java.util.ArrayList<>();
+        
+        boolean hasLocation = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        
+        boolean hasNotifications = true;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            hasNotifications = ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+        }
+
+        if (hasLocation && hasNotifications) {
             Intent serviceIntent = new Intent(this, LocationTrackingService.class);
             startForegroundService(serviceIntent);
         } else {
+            if (!hasLocation) {
+                permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            }
+            if (!hasNotifications && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS);
+            }
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1001);
+                    permissionsToRequest.toArray(new String[0]), 1001);
         }
     }
 
@@ -150,7 +166,14 @@ public class MainActivity extends AppCompatActivity
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1001) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            boolean locationGranted = false;
+            for (int i = 0; i < permissions.length; i++) {
+                if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) 
+                        && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    locationGranted = true;
+                }
+            }
+            if (locationGranted) {
                 Intent serviceIntent = new Intent(this, LocationTrackingService.class);
                 startForegroundService(serviceIntent);
             }

@@ -18,7 +18,8 @@ public class DataSeeder {
                         android.util.Log.d("SEEDER", "Cities collection is empty. Starting seed...");
                         executeSeeding();
                     } else {
-                        android.util.Log.d("SEEDER", "Database already seeded. Skipping seeding.");
+                        android.util.Log.d("SEEDER", "Database already seeded. Checking Ramallah specifically...");
+                        seedRamallahIfNeeded();
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -37,6 +38,7 @@ public class DataSeeder {
         seedDeadSea();
         seedNetanya();
         seedBeerSheva();
+        seedRamallah();
         android.util.Log.d("SEEDER", "Seeding calls initiated!");
     }
 
@@ -357,6 +359,44 @@ public class DataSeeder {
                 })
                 .addOnFailureListener(e -> {
                     android.util.Log.e("SEEDER", "Beer Sheva FAILED: " + e.getMessage());
+                });
+    }
+
+    // ==================== RAMALLAH (USER TEST LOCATION) ====================
+    private static void seedRamallahIfNeeded() {
+        db.collection("cities").document("ramallah")
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) {
+                        android.util.Log.d("SEEDER", "Ramallah is missing. Seeding Ramallah...");
+                        seedRamallah();
+                    } else {
+                        android.util.Log.d("SEEDER", "Ramallah is already seeded.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("SEEDER", "Failed to check if Ramallah is seeded: " + e.getMessage());
+                });
+    }
+
+    private static void seedRamallah() {
+        Map<String, Object> city = new HashMap<>();
+        city.put("name", "Ramallah");
+        city.put("country", "Palestine");
+        city.put("totalLandmarks", 1);
+        city.put("coverImage", "");
+
+        db.collection("cities").document("ramallah")
+                .set(city)
+                .addOnSuccessListener(unused -> {
+                    android.util.Log.d("SEEDER", "Ramallah SUCCESS!");
+                    addLandmark("ramallah", "lazaward",
+                            "Lazaward Restaurant",
+                            "A beautiful restaurant at Al Tireh Street, Ramallah.",
+                            31.9209736, 35.1762547, 100);
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("SEEDER", "Ramallah FAILED: " + e.getMessage());
                 });
     }
 

@@ -18,6 +18,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.mohammad_nazieh_amro.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.model.Landmark;
 
 public class LocationTrackingService extends Service {
 
@@ -25,13 +26,65 @@ public class LocationTrackingService extends Service {
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
 
+    private final java.util.List<Landmark> cachedLandmarks = new java.util.ArrayList<>();
+    private String lastCityNotificationName = null;
+    private final java.util.Set<String> notifiedLandmarks = new java.util.HashSet<>();
+
     @Override
     public void onCreate() {
         super.onCreate();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         createNotificationChannel();
         startForeground(1, buildNotification());
+        
+        // Cache all landmarks from Firestore once to save reads
+        cacheAllLandmarks();
+        
         startLocationUpdates();
+    }
+
+    private void cacheAllLandmarks() {
+        FirebaseFirestore.getInstance().collection("cities")
+                .get()
+                .addOnSuccessListener(cities -> {
+                    for (var cityDoc : cities) {
+                        String cityId = cityDoc.getId();
+                        FirebaseFirestore.getInstance().collection("cities")
+                                .document(cityId).collection("landmarks")
+                                .get()
+                                .addOnSuccessListener(landmarks -> {
+                                    for (var landmarkDoc : landmarks) {
+                                        Double lat = landmarkDoc.getDouble("latitude");
+                                        Double lng = landmarkDoc.getDouble("longitude");
+                                        String name = landmarkDoc.getString("name");
+                                        Long xp = landmarkDoc.getLong("xp");
+                                        
+                                        if (lat != null && lng != null && name != null) {
+                                            Landmark landmark = new Landmark();
+                                            landmark.setId(landmarkDoc.getId());
+                                            landmark.setName(name);
+                                            landmark.setCityId(cityId);
+                                            landmark.setLatitude(lat);
+                                            landmark.setLongitude(lng);
+                                            landmark.setXp(xp != null ? xp.intValue() : 100);
+                                            
+                                            synchronized (cachedLandmarks) {
+                                                boolean exists = false;
+                                                for (Landmark l : cachedLandmarks) {
+                                                    if (l.getId().equals(landmark.getId())) {
+                                                        exists = true;
+                                                        break;
+                                                    }
+                                                }
+                                                if (!exists) {
+                                                    cachedLandmarks.add(landmark);
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                    }
+                });
     }
 
     private void startLocationUpdates() {
@@ -62,41 +115,76 @@ public class LocationTrackingService extends Service {
         double lat = location.getLatitude();
         double lng = location.getLongitude();
 
+        String currentCityId = null;
+        String currentCityName = null;
+
+        // Check boundaries of cities
         if (lat >= 31.7 && lat <= 31.85 && lng >= 35.1 && lng <= 35.3) {
-            sendCityNotification("Jerusalem");
-            checkNearbyLandmarks(location, "jerusalem");
+            currentCityId = "jerusalem";
+            currentCityName = "Jerusalem";
+        } else if (lat >= 31.9 && lat <= 32.2 && lng >= 34.7 && lng <= 34.9) {
+            currentCityId = "tel_aviv";
+            currentCityName = "Tel Aviv";
+        } else if (lat >= 32.75 && lat <= 32.85 && lng >= 34.95 && lng <= 35.05) {
+            currentCityId = "haifa";
+            currentCityName = "Haifa";
+        } else if (lat >= 32.65 && lat <= 32.75 && lng >= 35.25 && lng <= 35.35) {
+            currentCityId = "nazareth";
+            currentCityName = "Nazareth";
+        } else if (lat >= 29.45 && lat <= 29.6 && lng >= 34.85 && lng <= 35.0) {
+            currentCityId = "eilat";
+            currentCityName = "Eilat";
+        } else if (lat >= 31.25 && lat <= 31.8 && lng >= 35.3 && lng <= 35.5) {
+            currentCityId = "dead_sea";
+            currentCityName = "Dead Sea";
+        } else if (lat >= 32.25 && lat <= 32.38 && lng >= 34.82 && lng <= 34.88) {
+            currentCityId = "netanya";
+            currentCityName = "Netanya";
+        } else if (lat >= 31.2 && lat <= 31.3 && lng >= 34.75 && lng <= 34.85) {
+            currentCityId = "beer_sheva";
+            currentCityName = "Beer Sheva";
+        } else if (lat >= 31.91 && lat <= 31.93 && lng >= 35.16 && lng <= 35.19) {
+            currentCityId = "ramallah";
+            currentCityName = "Ramallah";
         }
 
-        if (lat >= 31.9 && lat <= 32.2 && lng >= 34.7 && lng <= 34.9) {
-            sendCityNotification("Tel Aviv");
-            checkNearbyLandmarks(location, "tel_aviv");
+        if (currentCityId != null) {
+            if (!currentCityName.equals(lastCityNotificationName)) {
+                sendCityNotification(currentCityName);
+                lastCityNotificationName = currentCityName;
+            }
+            checkNearbyLandmarks(location, currentCityId);
+        } else {
+            lastCityNotificationName = null;
         }
     }
 
     private void checkNearbyLandmarks(Location userLocation, String cityId) {
-        FirebaseFirestore.getInstance()
-                .collection("cities").document(cityId)
-                .collection("landmarks")
-                .get()
-                .addOnSuccessListener(landmarks -> {
-                    for (var doc : landmarks) {
-                        Double landmarkLat = doc.getDouble("latitude");
-                        Double landmarkLng = doc.getDouble("longitude");
-                        String landmarkName = doc.getString("name");
+        synchronized (cachedLandmarks) {
+            for (Landmark landmark : cachedLandmarks) {
+                if (landmark.getCityId().equals(cityId)) {
+                    float[] results = new float[1];
+                    Location.distanceBetween(
+                            userLocation.getLatitude(),
+                            userLocation.getLongitude(),
+                            landmark.getLatitude(),
+                            landmark.getLongitude(),
+                            results);
 
-                        if (landmarkLat != null && landmarkLng != null) {
-                            float[] results = new float[1];
-                            Location.distanceBetween(
-                                    userLocation.getLatitude(),
-                                    userLocation.getLongitude(),
-                                    landmarkLat, landmarkLng, results);
+                    float distance = results[0];
+                    String landmarkId = landmark.getId();
 
-                            if (results[0] <= 200) {
-                                sendLandmarkNotification(landmarkName, (int) results[0]);
-                            }
+                    if (distance <= 200) {
+                        if (!notifiedLandmarks.contains(landmarkId)) {
+                            sendLandmarkNotification(landmark.getName(), (int) distance);
+                            notifiedLandmarks.add(landmarkId);
                         }
+                    } else if (distance > 250) {
+                        notifiedLandmarks.remove(landmarkId);
                     }
-                });
+                }
+            }
+        }
     }
 
     private void sendLandmarkNotification(String landmarkName, int distance) {
@@ -107,7 +195,8 @@ public class LocationTrackingService extends Service {
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build();
-        nm.notify((int) System.currentTimeMillis(), notification);
+        // Use a static ID to overwrite previous landmark notifications instead of flooding the notification bar
+        nm.notify(10, notification);
     }
 
     private void sendCityNotification(String cityName) {
