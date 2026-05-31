@@ -16,6 +16,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.mohammad_nazieh_amro.cityconquer.R;
 
 public class LocationTrackingService extends Service {
@@ -58,14 +59,55 @@ public class LocationTrackingService extends Service {
     }
 
     private void checkCityEntry(Location location) {
-        // Will be expanded later with city boundary checking
         double lat = location.getLatitude();
         double lng = location.getLongitude();
 
-        // Jerusalem bounds check (example)
         if (lat >= 31.7 && lat <= 31.85 && lng >= 35.1 && lng <= 35.3) {
             sendCityNotification("Jerusalem");
+            checkNearbyLandmarks(location, "jerusalem");
         }
+
+        if (lat >= 31.9 && lat <= 32.2 && lng >= 34.7 && lng <= 34.9) {
+            sendCityNotification("Tel Aviv");
+            checkNearbyLandmarks(location, "tel_aviv");
+        }
+    }
+
+    private void checkNearbyLandmarks(Location userLocation, String cityId) {
+        FirebaseFirestore.getInstance()
+                .collection("cities").document(cityId)
+                .collection("landmarks")
+                .get()
+                .addOnSuccessListener(landmarks -> {
+                    for (var doc : landmarks) {
+                        Double landmarkLat = doc.getDouble("latitude");
+                        Double landmarkLng = doc.getDouble("longitude");
+                        String landmarkName = doc.getString("name");
+
+                        if (landmarkLat != null && landmarkLng != null) {
+                            float[] results = new float[1];
+                            Location.distanceBetween(
+                                    userLocation.getLatitude(),
+                                    userLocation.getLongitude(),
+                                    landmarkLat, landmarkLng, results);
+
+                            if (results[0] <= 200) {
+                                sendLandmarkNotification(landmarkName, (int) results[0]);
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void sendLandmarkNotification(String landmarkName, int distance) {
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("📍 " + landmarkName + " nearby!")
+                .setContentText("You are " + distance + "m away. Go conquer it! 🏆")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .build();
+        nm.notify((int) System.currentTimeMillis(), notification);
     }
 
     private void sendCityNotification(String cityName) {
@@ -74,6 +116,7 @@ public class LocationTrackingService extends Service {
                 .setContentTitle("You're in " + cityName + "! 🏛️")
                 .setContentText("Landmarks nearby to conquer!")
                 .setSmallIcon(R.mipmap.ic_launcher)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build();
         nm.notify(2, notification);
     }

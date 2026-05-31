@@ -20,7 +20,6 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -28,8 +27,11 @@ import com.mohammad_nazieh_amro.cityconquer.R;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class LandmarkActivity extends AppCompatActivity {
 
@@ -43,6 +45,7 @@ public class LandmarkActivity extends AppCompatActivity {
 
     private String landmarkId, cityId, currentPhotoPath;
     private double landmarkLat, landmarkLng;
+    private int landmarkXp = 100;
     private Uri photoUri;
 
     private FusedLocationProviderClient fusedLocationClient;
@@ -68,6 +71,7 @@ public class LandmarkActivity extends AppCompatActivity {
         cityId = getIntent().getStringExtra("cityId");
         landmarkLat = getIntent().getDoubleExtra("latitude", 0);
         landmarkLng = getIntent().getDoubleExtra("longitude", 0);
+        landmarkXp = getIntent().getIntExtra("xp", 100);
 
         String name = getIntent().getStringExtra("name");
         String description = getIntent().getStringExtra("description");
@@ -75,7 +79,28 @@ public class LandmarkActivity extends AppCompatActivity {
         landmarkName.setText(name);
         landmarkDescription.setText(description);
 
+        // Check if already conquered
+        checkIfAlreadyConquered();
+
         conquestBtn.setOnClickListener(v -> checkLocationAndConquer());
+    }
+
+    private void checkIfAlreadyConquered() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users").document(userId)
+                .collection("conquests").document(cityId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists() && doc.get("completedLandmarks") != null) {
+                        java.util.List<String> completed =
+                                (java.util.List<String>) doc.get("completedLandmarks");
+                        if (completed.contains(landmarkId)) {
+                            statusText.setText("🏆 Already Conquered!");
+                            conquestBtn.setEnabled(false);
+                            conquestBtn.setText("Already Conquered ✅");
+                        }
+                    }
+                });
     }
 
     private void checkLocationAndConquer() {
@@ -154,13 +179,38 @@ public class LandmarkActivity extends AppCompatActivity {
     }
 
     private void markAsConquered(String userId, String photoUrl) {
+        // Mark landmark as conquered
         db.collection("users").document(userId)
                 .collection("conquests").document(cityId)
-                .update("completedLandmarks", FieldValue.arrayUnion(landmarkId))
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        db.collection("users").document(userId)
+                                .collection("conquests").document(cityId)
+                                .update("completedLandmarks",
+                                        com.google.firebase.firestore.FieldValue
+                                                .arrayUnion(landmarkId));
+                    } else {
+                        Map<String, Object> conquest = new HashMap<>();
+                        conquest.put("completedLandmarks", Arrays.asList(landmarkId));
+                        conquest.put("cityXP", 0);
+                        db.collection("users").document(userId)
+                                .collection("conquests").document(cityId)
+                                .set(conquest);
+                    }
+                });
+
+        // Update user total XP
+        db.collection("users").document(userId)
+                .update("totalXP",
+                        com.google.firebase.firestore.FieldValue.increment(landmarkXp))
                 .addOnSuccessListener(unused -> {
                     statusText.setText("🏆 Landmark Conquered!");
                     conquestBtn.setEnabled(false);
-                    Toast.makeText(this, "Conquered! +100 XP", Toast.LENGTH_SHORT).show();
+                    conquestBtn.setText("Already Conquered ✅");
+                    Toast.makeText(this,
+                            "+" + landmarkXp + " XP! Keep exploring! 🌍",
+                            Toast.LENGTH_LONG).show();
                 });
     }
 

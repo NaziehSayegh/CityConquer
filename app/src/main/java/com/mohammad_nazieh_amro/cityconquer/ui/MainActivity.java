@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.mohammad_nazieh_amro.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.service.LocationTrackingService;
 import com.mohammad_nazieh_amro.cityconquer.ui.fragment.CitiesFragment;
 import com.mohammad_nazieh_amro.cityconquer.ui.fragment.FriendsFragment;
 import com.mohammad_nazieh_amro.cityconquer.ui.fragment.LeaderboardFragment;
@@ -33,6 +34,10 @@ public class MainActivity extends AppCompatActivity
 
         DataSeeder.seedData();
 
+        // Start location tracking service
+        Intent serviceIntent = new Intent(this, LocationTrackingService.class);
+        startForegroundService(serviceIntent);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -50,7 +55,6 @@ public class MainActivity extends AppCompatActivity
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnItemSelectedListener(this::onBottomNavItemSelected);
 
-        // Show Leaderboard first
         loadFragment(new LeaderboardFragment());
         bottomNavigationView.setSelectedItemId(R.id.nav_leaderboard);
     }
