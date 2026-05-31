@@ -55,6 +55,12 @@ public class LeaderboardFragment extends Fragment {
                         userList.add(user);
                     }
                     adapter.updateList(userList);
+                })
+                .addOnFailureListener(e -> {
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Failed to load leaderboard: " + e.getMessage(), 
+                                android.widget.Toast.LENGTH_LONG).show();
+                    }
                 });
     }
 }

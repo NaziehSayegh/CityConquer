@@ -3,8 +3,12 @@ package com.mohammad_nazieh_amro.cityconquer.ui.auth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Patterns;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -17,9 +21,14 @@ import java.util.Map;
 public class AuthActivity extends AppCompatActivity {
 
     private EditText emailInput, passwordInput, usernameInput;
-    private Button loginBtn, registerBtn;
+    private Button authActionBtn;
+    private TextView authToggleText;
+    private ProgressBar progressBar;
+    
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    
+    private boolean isLoginMode = true; // Defaults to Login mode
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,11 +41,39 @@ public class AuthActivity extends AppCompatActivity {
         emailInput = findViewById(R.id.email_input);
         passwordInput = findViewById(R.id.password_input);
         usernameInput = findViewById(R.id.username_input);
-        loginBtn = findViewById(R.id.login_btn);
-        registerBtn = findViewById(R.id.register_btn);
+        authActionBtn = findViewById(R.id.auth_action_btn);
+        authToggleText = findViewById(R.id.auth_toggle_text);
+        progressBar = findViewById(R.id.auth_progress_bar);
 
-        loginBtn.setOnClickListener(v -> loginUser());
-        registerBtn.setOnClickListener(v -> registerUser());
+        authActionBtn.setOnClickListener(v -> handleAuthAction());
+        authToggleText.setOnClickListener(v -> toggleAuthMode());
+
+        updateUI();
+    }
+
+    private void toggleAuthMode() {
+        isLoginMode = !isLoginMode;
+        updateUI();
+    }
+
+    private void updateUI() {
+        if (isLoginMode) {
+            usernameInput.setVisibility(View.GONE);
+            authActionBtn.setText("LOGIN");
+            authToggleText.setText("Don't have an account? Register");
+        } else {
+            usernameInput.setVisibility(View.VISIBLE);
+            authActionBtn.setText("REGISTER");
+            authToggleText.setText("Already have an account? Login");
+        }
+    }
+
+    private void handleAuthAction() {
+        if (isLoginMode) {
+            loginUser();
+        } else {
+            registerUser();
+        }
     }
 
     private void loginUser() {
@@ -48,14 +85,23 @@ public class AuthActivity extends AppCompatActivity {
             return;
         }
 
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        showLoading(true);
+
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener(authResult -> {
-                    startActivity(new Intent(this, MainActivity.class));
-                    finish();
+                    showLoading(false);
+                    navigateToMain();
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Login failed: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    showLoading(false);
+                    Toast.makeText(this, "Login failed: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
     }
 
     private void registerUser() {
@@ -68,6 +114,18 @@ public class AuthActivity extends AppCompatActivity {
             return;
         }
 
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (password.length() < 6) {
+            Toast.makeText(this, "Password must be at least 6 characters long", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        showLoading(true);
+
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener(authResult -> {
                     String userId = authResult.getUser().getUid();
@@ -79,15 +137,50 @@ public class AuthActivity extends AppCompatActivity {
                     user.put("level", 1);
                     user.put("friends", new java.util.ArrayList<>());
 
+                    // Save user profile to Firestore
                     db.collection("users").document(userId)
                             .set(user)
                             .addOnSuccessListener(unused -> {
-                                startActivity(new Intent(this, MainActivity.class));
-                                finish();
+                                showLoading(false);
+                                navigateToMain();
+                            })
+                            .addOnFailureListener(e -> {
+                                // Firestore write failed. Rollback/signout user so their session is not incomplete
+                                mAuth.signOut();
+                                showLoading(false);
+                                Toast.makeText(this, "Database write failed: " + e.getMessage() + 
+                                        "\nCheck Firestore Rules!", Toast.LENGTH_LONG).show();
                             });
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Register failed: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    showLoading(false);
+                    Toast.makeText(this, "Registration failed: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
     }
-}
+
+    private void navigateToMain() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void showLoading(boolean isLoading) {
+        if (isLoading) {
+            progressBar.setVisibility(View.VISIBLE);
+            authActionBtn.setEnabled(false);
+            authToggleText.setEnabled(false);
+            emailInput.setEnabled(false);
+            passwordInput.setEnabled(false);
+            usernameInput.setEnabled(false);
+        } else {
+            progressBar.setVisibility(View.GONE);
+            authActionBtn.setEnabled(true);
+            authToggleText.setEnabled(true);
+            emailInput.setEnabled(true);
+            passwordInput.setEnabled(true);
+            usernameInput.setEnabled(true);
+        }
+    }
+}

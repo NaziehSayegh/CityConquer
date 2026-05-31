@@ -49,6 +49,12 @@ public class CitiesFragment extends Fragment {
                         cities.add(city);
                     }
                     cityAdapter.updateList(cities);
+                })
+                .addOnFailureListener(e -> {
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Failed to load cities: " + e.getMessage(), 
+                                android.widget.Toast.LENGTH_LONG).show();
+                    }
                 });
     }
 }

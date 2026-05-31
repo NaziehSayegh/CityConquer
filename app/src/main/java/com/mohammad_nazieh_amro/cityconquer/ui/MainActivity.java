@@ -2,6 +2,7 @@ package com.mohammad_nazieh_amro.cityconquer.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -20,6 +21,10 @@ import com.mohammad_nazieh_amro.cityconquer.ui.fragment.LeaderboardFragment;
 import com.mohammad_nazieh_amro.cityconquer.ui.fragment.MapFragment;
 import com.mohammad_nazieh_amro.cityconquer.ui.fragment.ProfileFragment;
 import com.mohammad_nazieh_amro.cityconquer.util.DataSeeder;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -30,13 +35,24 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Verify that the user is logged in
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Intent intent = new Intent(this, com.mohammad_nazieh_amro.cityconquer.ui.auth.AuthActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_main);
 
+        Log.d("MAIN", "MainActivity started!");
         DataSeeder.seedData();
+        Log.d("MAIN", "Seeder called!");
 
-        // Start location tracking service
-        Intent serviceIntent = new Intent(this, LocationTrackingService.class);
-        startForegroundService(serviceIntent);
+        // Start location tracking service check
+        checkLocationPermissionAndStartService();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -115,6 +131,29 @@ public class MainActivity extends AppCompatActivity
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    private void checkLocationPermissionAndStartService() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Intent serviceIntent = new Intent(this, LocationTrackingService.class);
+            startForegroundService(serviceIntent);
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1001);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1001) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Intent serviceIntent = new Intent(this, LocationTrackingService.class);
+                startForegroundService(serviceIntent);
+            }
         }
     }
 }

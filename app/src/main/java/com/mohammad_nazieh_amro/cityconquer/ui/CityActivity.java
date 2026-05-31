@@ -58,7 +58,15 @@ public class CityActivity extends AppCompatActivity {
                         landmark.setId(doc.getId());
                         landmarks.add(landmark);
                     }
+                    // Render landmarks list immediately so they are visible
+                    adapter.updateList(landmarks);
+                    
+                    // Fetch conquest history to update status
                     updateProgress();
+                })
+                .addOnFailureListener(e -> {
+                    android.widget.Toast.makeText(this, "Failed to load landmarks: " + e.getMessage(), 
+                            android.widget.Toast.LENGTH_LONG).show();
                 });
     }
 
@@ -81,6 +89,15 @@ public class CityActivity extends AppCompatActivity {
                     int percent = total > 0 ? (completed * 100 / total) : 0;
                     progressText.setText(completed + "/" + total + " Conquered");
                     progressBar.setProgress(percent);
+                    
+                    // Update list with the updated conquered states
+                    adapter.updateList(landmarks);
+                })
+                .addOnFailureListener(e -> {
+                    // Fallback to update view details if conquest check fails (e.g. firestore rules)
+                    int total = landmarks.size();
+                    progressText.setText("0/" + total + " Conquered");
+                    progressBar.setProgress(0);
                     adapter.updateList(landmarks);
                 });
     }
