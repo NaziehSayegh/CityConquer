@@ -8,7 +8,7 @@ public class DataSeeder {
 
     private static final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public static void seedData() {
+    public static void seedData(final android.content.Context context) {
         android.util.Log.d("SEEDER", "Checking if database is already seeded...");
         db.collection("cities")
                 .limit(1)
@@ -16,21 +16,24 @@ public class DataSeeder {
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
                         android.util.Log.d("SEEDER", "Cities collection is empty. Starting seed...");
-                        executeSeeding();
+                        executeSeeding(context);
                     } else {
                         android.util.Log.d("SEEDER", "Database already seeded. Checking Ramallah specifically...");
-                        seedRamallahIfNeeded();
-                        seedFakeUsers();
+                        seedRamallahIfNeeded(context);
+                        seedFakeUsers(context);
                     }
                 })
                 .addOnFailureListener(e -> {
                     android.util.Log.e("SEEDER", "Failed to access cities collection: " + e.getMessage());
                     android.util.Log.e("SEEDER", "CRITICAL: If the error is 'PERMISSION_DENIED', please update your Firebase Firestore Security Rules " +
                             "to allow read/write access to the 'cities' collection for authenticated users.");
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        android.widget.Toast.makeText(context, "DB Error: " + e.getMessage() + "\nPlease check Firestore Security Rules!", android.widget.Toast.LENGTH_LONG).show();
+                    });
                 });
     }
 
-    private static void executeSeeding() {
+    private static void executeSeeding(final android.content.Context context) {
         seedJerusalem();
         seedTelAviv();
         seedHaifa();
@@ -40,7 +43,7 @@ public class DataSeeder {
         seedNetanya();
         seedBeerSheva();
         seedRamallah();
-        seedFakeUsers();
+        seedFakeUsers(context);
         android.util.Log.d("SEEDER", "Seeding calls initiated!");
     }
 
@@ -365,7 +368,7 @@ public class DataSeeder {
     }
 
     // ==================== RAMALLAH (USER TEST LOCATION) ====================
-    private static void seedRamallahIfNeeded() {
+    private static void seedRamallahIfNeeded(final android.content.Context context) {
         db.collection("cities").document("ramallah")
                 .get()
                 .addOnSuccessListener(doc -> {
@@ -378,6 +381,9 @@ public class DataSeeder {
                 })
                 .addOnFailureListener(e -> {
                     android.util.Log.e("SEEDER", "Failed to check if Ramallah is seeded: " + e.getMessage());
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        android.widget.Toast.makeText(context, "Failed to check Ramallah: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                    });
                 });
     }
 
@@ -403,16 +409,16 @@ public class DataSeeder {
     }
 
     // ==================== FAKE USERS ====================
-    private static void seedFakeUsers() {
+    private static void seedFakeUsers(final android.content.Context context) {
         android.util.Log.d("SEEDER", "Seeding fake users for leaderboard and friends testing...");
-        createFakeUser("user_mike", "explorer_mike", "mike@conquer.com", 1200, 5);
-        createFakeUser("user_jane", "jane_doe", "jane@conquer.com", 950, 4);
-        createFakeUser("user_leo", "nomad_leo", "leo@conquer.com", 600, 3);
-        createFakeUser("user_sarah", "wanderer_sarah", "sarah@conquer.com", 300, 2);
-        createFakeUser("user_john", "roamer_john", "john@conquer.com", 100, 1);
+        createFakeUser(context, "user_mike", "explorer_mike", "mike@conquer.com", 1200, 5);
+        createFakeUser(context, "user_jane", "jane_doe", "jane@conquer.com", 950, 4);
+        createFakeUser(context, "user_leo", "nomad_leo", "leo@conquer.com", 600, 3);
+        createFakeUser(context, "user_sarah", "wanderer_sarah", "sarah@conquer.com", 300, 2);
+        createFakeUser(context, "user_john", "roamer_john", "john@conquer.com", 100, 1);
     }
 
-    private static void createFakeUser(String userId, String username, String email, int xp, int level) {
+    private static void createFakeUser(final android.content.Context context, String userId, String username, String email, int xp, int level) {
         Map<String, Object> user = new HashMap<>();
         user.put("username", username);
         user.put("email", email);
@@ -424,8 +430,12 @@ public class DataSeeder {
                 .set(user)
                 .addOnSuccessListener(unused ->
                         android.util.Log.d("SEEDER", "Fake user " + username + " seeded!"))
-                .addOnFailureListener(e ->
-                        android.util.Log.e("SEEDER", "Failed to seed fake user " + username + ": " + e.getMessage()));
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("SEEDER", "Failed to seed fake user " + username + ": " + e.getMessage());
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        android.widget.Toast.makeText(context, "Failed to seed " + username + ": " + e.getMessage() + "\nUpdate Firestore rules to allow write!", android.widget.Toast.LENGTH_LONG).show();
+                    });
+                });
     }
 
     // ==================== HELPER ====================

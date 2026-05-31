@@ -29,6 +29,7 @@ public class FriendsFragment extends Fragment {
     private FirebaseFirestore db;
     private String currentUserId;
     private List<User> friendsList = new ArrayList<>();
+    private com.mohammad_nazieh_amro.cityconquer.adapter.FriendsAdapter adapter;
 
     @Nullable
     @Override
@@ -42,6 +43,10 @@ public class FriendsFragment extends Fragment {
         addFriendBtn = view.findViewById(R.id.add_friend_btn);
         friendsRecycler = view.findViewById(R.id.friends_recycler);
         friendsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        adapter = new com.mohammad_nazieh_amro.cityconquer.adapter.FriendsAdapter(friendsList);
+        friendsRecycler.setAdapter(adapter);
+
         addFriendBtn.setOnClickListener(v -> addFriend());
         loadFriends();
         return view;
@@ -81,8 +86,14 @@ public class FriendsFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     List<String> friendIds = (List<String>) documentSnapshot.get("friends");
-                    if (friendIds == null || friendIds.isEmpty()) return;
+                    if (friendIds == null || friendIds.isEmpty()) {
+                        friendsList.clear();
+                        adapter.updateList(friendsList);
+                        return;
+                    }
                     friendsList.clear();
+                    final int totalFriends = friendIds.size();
+                    final java.util.concurrent.atomic.AtomicInteger loadedCount = new java.util.concurrent.atomic.AtomicInteger(0);
                     for (String friendId : friendIds) {
                         db.collection("users").document(friendId)
                                 .get()
@@ -91,6 +102,14 @@ public class FriendsFragment extends Fragment {
                                     if (friend != null) {
                                         friend.setId(friendDoc.getId());
                                         friendsList.add(friend);
+                                    }
+                                    if (loadedCount.incrementAndGet() == totalFriends) {
+                                        adapter.updateList(friendsList);
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (loadedCount.incrementAndGet() == totalFriends) {
+                                        adapter.updateList(friendsList);
                                     }
                                 });
                     }

@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         Log.d("MAIN", "MainActivity started!");
-        DataSeeder.seedData();
+        DataSeeder.seedData(this);
         Log.d("MAIN", "Seeder called!");
 
         // Start location tracking service check

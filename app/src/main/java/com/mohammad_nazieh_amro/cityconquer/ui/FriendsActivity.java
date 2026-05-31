@@ -23,6 +23,7 @@ public class FriendsActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private String currentUserId;
     private List<User> friendsList = new ArrayList<>();
+    private com.mohammad_nazieh_amro.cityconquer.adapter.FriendsAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,9 @@ public class FriendsActivity extends AppCompatActivity {
         addFriendBtn = findViewById(R.id.add_friend_btn);
         friendsRecycler = findViewById(R.id.friends_recycler);
         friendsRecycler.setLayoutManager(new LinearLayoutManager(this));
+
+        adapter = new com.mohammad_nazieh_amro.cityconquer.adapter.FriendsAdapter(friendsList);
+        friendsRecycler.setAdapter(adapter);
 
         addFriendBtn.setOnClickListener(v -> addFriend());
         loadFriends();
@@ -81,9 +85,15 @@ public class FriendsActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     List<String> friendIds = (List<String>) documentSnapshot.get("friends");
-                    if (friendIds == null || friendIds.isEmpty()) return;
+                    if (friendIds == null || friendIds.isEmpty()) {
+                        friendsList.clear();
+                        adapter.updateList(friendsList);
+                        return;
+                    }
 
                     friendsList.clear();
+                    final int totalFriends = friendIds.size();
+                    final java.util.concurrent.atomic.AtomicInteger loadedCount = new java.util.concurrent.atomic.AtomicInteger(0);
                     for (String friendId : friendIds) {
                         db.collection("users").document(friendId)
                                 .get()
@@ -93,8 +103,18 @@ public class FriendsActivity extends AppCompatActivity {
                                         friend.setId(friendDoc.getId());
                                         friendsList.add(friend);
                                     }
+                                    if (loadedCount.incrementAndGet() == totalFriends) {
+                                        adapter.updateList(friendsList);
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (loadedCount.incrementAndGet() == totalFriends) {
+                                        adapter.updateList(friendsList);
+                                    }
                                 });
                     }
-                });
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error loading friends: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 }
