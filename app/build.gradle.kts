@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.androidkings.cityconquer"
+    namespace = "com.mohammad_nazieh_amro.cityconquer"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.androidkings.cityconquer"
+        applicationId = "com.mohammad_nazieh_amro.cityconquer"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
