@@ -1,6 +1,7 @@
 package com.mohammad_nazieh_amro.cityconquer.ui;
 
 import android.os.Bundle;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -8,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.mohammad_nazieh_amro.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.adapter.LandmarkAdapter;
 import com.mohammad_nazieh_amro.cityconquer.model.Landmark;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +17,12 @@ import java.util.List;
 public class CityActivity extends AppCompatActivity {
 
     private TextView cityNameText, progressText;
+    private ProgressBar progressBar;
     private RecyclerView landmarksRecycler;
     private FirebaseFirestore db;
     private String cityId;
     private List<Landmark> landmarks = new ArrayList<>();
+    private LandmarkAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +31,18 @@ public class CityActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         cityId = getIntent().getStringExtra("cityId");
+        String cityName = getIntent().getStringExtra("cityName");
 
         cityNameText = findViewById(R.id.city_name);
         progressText = findViewById(R.id.progress_text);
+        progressBar = findViewById(R.id.progress_bar);
         landmarksRecycler = findViewById(R.id.landmarks_recycler);
         landmarksRecycler.setLayoutManager(new LinearLayoutManager(this));
+
+        if (cityName != null) cityNameText.setText(cityName);
+
+        adapter = new LandmarkAdapter(landmarks, cityId);
+        landmarksRecycler.setAdapter(adapter);
 
         loadLandmarks();
     }
@@ -66,7 +77,11 @@ public class CityActivity extends AppCompatActivity {
                             l.setConquered(completedList.contains(l.getId()));
                         }
                     }
-                    progressText.setText(completed + "/" + landmarks.size() + " Conquered");
+                    int total = landmarks.size();
+                    int percent = total > 0 ? (completed * 100 / total) : 0;
+                    progressText.setText(completed + "/" + total + " Conquered");
+                    progressBar.setProgress(percent);
+                    adapter.updateList(landmarks);
                 });
     }
 }

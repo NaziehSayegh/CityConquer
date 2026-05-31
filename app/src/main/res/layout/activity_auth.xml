@@ -2,18 +2,27 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1A1A2E"
+    android:background="#0D1B2A"
     android:padding="24dp">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp"
+        android:src="@drawable/logo"/>
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/logo"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="16dp"
         android:text="CityConquer"
-        android:textColor="#E94560"
-        android:textSize="32sp"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
         android:textStyle="bold"/>
 
     <TextView
@@ -22,17 +31,30 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/title"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:text="Explore. Conquer. Compete."
+        android:layout_marginTop="4dp"
+        android:text="EXPLORE · CAPTURE · CONQUER"
+        android:textColor="#00BCD4"
+        android:textSize="12sp"/>
+
+    <EditText
+        android:id="@+id/username_input"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_below="@id/subtitle"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/input_background"
+        android:hint="Username"
+        android:inputType="text"
+        android:paddingStart="16dp"
         android:textColor="#FFFFFF"
-        android:textSize="14sp"/>
+        android:textColorHint="#888888"/>
 
     <EditText
         android:id="@+id/email_input"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_below="@id/subtitle"
-        android:layout_marginTop="60dp"
+        android:layout_below="@id/username_input"
+        android:layout_marginTop="12dp"
         android:background="@drawable/input_background"
         android:hint="Email"
         android:inputType="textEmailAddress"
@@ -45,7 +67,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_below="@id/email_input"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/input_background"
         android:hint="Password"
         android:inputType="textPassword"
@@ -58,7 +80,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_below="@id/password_input"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:background="@drawable/button_background"
         android:text="LOGIN"
         android:textColor="#FFFFFF"
@@ -70,10 +92,10 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_below="@id/login_btn"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/button_outline_background"
         android:text="REGISTER"
-        android:textColor="#E94560"
+        android:textColor="#00BCD4"
         android:textSize="16sp"
         android:textStyle="bold"/>
 

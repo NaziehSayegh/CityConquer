@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.mohammad_nazieh_amro.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.adapter.LeaderboardAdapter;
 import com.mohammad_nazieh_amro.cityconquer.model.User;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class LeaderboardFragment extends Fragment {
     private RecyclerView leaderboardRecycler;
     private FirebaseFirestore db;
     private List<User> userList = new ArrayList<>();
+    private LeaderboardAdapter adapter;
 
     @Nullable
     @Override
@@ -32,6 +34,9 @@ public class LeaderboardFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         leaderboardRecycler = view.findViewById(R.id.leaderboard_recycler);
         leaderboardRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        adapter = new LeaderboardAdapter(userList);
+        leaderboardRecycler.setAdapter(adapter);
 
         loadLeaderboard();
         return view;
@@ -49,6 +54,7 @@ public class LeaderboardFragment extends Fragment {
                         user.setId(doc.getId());
                         userList.add(user);
                     }
+                    adapter.updateList(userList);
                 });
     }
 }
