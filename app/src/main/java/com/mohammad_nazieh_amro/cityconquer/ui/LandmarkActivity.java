@@ -7,9 +7,15 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -42,7 +48,10 @@ public class LandmarkActivity extends AppCompatActivity {
     private TextView landmarkName, landmarkDescription, statusText;
     private ImageView landmarkImage;
     private Button conquestBtn;
-    private TextView distanceText, radiusText, xpBadge, distanceLabel;
+    private TextView distanceText, radiusText, xpAmountText, distanceLabel;
+    private FrameLayout xpPopupOverlay;
+    private LinearLayout xpPopup;
+    private TextView xpPopupAmount;
 
     private String landmarkId, cityId, currentPhotoPath;
     private double landmarkLat, landmarkLng;
@@ -73,8 +82,11 @@ public class LandmarkActivity extends AppCompatActivity {
         conquestBtn = findViewById(R.id.conquest_btn);
         distanceText = findViewById(R.id.distance_text);
         radiusText = findViewById(R.id.radius_text);
-        xpBadge = findViewById(R.id.landmark_xp_badge);
+        xpAmountText = findViewById(R.id.xp_amount_text);
         distanceLabel = findViewById(R.id.distance_label);
+        xpPopupOverlay = findViewById(R.id.xp_popup_overlay);
+        xpPopup = findViewById(R.id.xp_popup);
+        xpPopupAmount = findViewById(R.id.xp_popup_amount);
 
         landmarkId = getIntent().getStringExtra("landmarkId");
         cityId = getIntent().getStringExtra("cityId");
@@ -87,13 +99,16 @@ public class LandmarkActivity extends AppCompatActivity {
 
         landmarkName.setText(name);
         landmarkDescription.setText(description);
-        xpBadge.setText("+" + landmarkXp + " XP");
+        xpAmountText.setText("+" + landmarkXp);
         radiusText.setText((int) maxDistanceMeters + " m");
 
         // Check if already conquered
         checkIfAlreadyConquered();
 
         conquestBtn.setOnClickListener(v -> checkLocationAndConquer());
+
+        // Tap popup to dismiss
+        xpPopupOverlay.setOnClickListener(v -> dismissXpPopup());
     }
 
     private void checkIfAlreadyConquered() {
@@ -152,6 +167,7 @@ public class LandmarkActivity extends AppCompatActivity {
                     landmarkLat, landmarkLng, results);
 
             int distance = (int) results[0];
+            lastCheckedDistance = distance;
             distanceText.setText(distance + " m");
 
             if (results[0] <= maxDistanceMeters) {
@@ -213,18 +229,16 @@ public class LandmarkActivity extends AppCompatActivity {
                                 markAsConquered(userId, uri.toString(), lastCheckedDistance))
                         .addOnFailureListener(e -> {
                             android.util.Log.w("CONQUEST", "Failed to get download URL, falling back to local photo reference", e);
-                            Toast.makeText(this, "Using local link: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             markAsConquered(userId, photoUri.toString(), lastCheckedDistance);
                         }))
                 .addOnFailureListener(e -> {
-                    android.util.Log.w("CONQUEST", "Firebase Storage upload failed/disabled. Falling back to local reference to allow conquest!", e);
-                    Toast.makeText(this, "Firebase Storage offline/unpaid. Conquering using local photo reference! 📸🏆", Toast.LENGTH_LONG).show();
+                    android.util.Log.w("CONQUEST", "Firebase Storage upload failed/disabled. Falling back to local reference.", e);
                     markAsConquered(userId, photoUri.toString(), lastCheckedDistance);
                 });
     }
 
     private void markAsConquered(String userId, String photoUrl, int conqueredDistance) {
-        // Mark landmark as conquered
+        // Mark landmark as conquered in Firestore
         db.collection("users").document(userId)
                 .collection("conquests").document(cityId)
                 .get()
@@ -268,7 +282,7 @@ public class LandmarkActivity extends AppCompatActivity {
                     Toast.makeText(this, "Error checking conquest state: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
 
-        // Update user total XP
+        // Update user total XP and show in-app popup
         db.collection("users").document(userId)
                 .update("totalXP",
                         com.google.firebase.firestore.FieldValue.increment(landmarkXp))
@@ -276,14 +290,40 @@ public class LandmarkActivity extends AppCompatActivity {
                     statusText.setText("🏆 Landmark Conquered!");
                     conquestBtn.setEnabled(false);
                     conquestBtn.setText("Already Conquered ✅");
-                    Toast.makeText(this,
-                            "+" + landmarkXp + " XP! Keep exploring! 🌍",
-                            Toast.LENGTH_LONG).show();
+                    // Show the in-app XP celebration popup
+                    showXpPopup(landmarkXp);
                 })
                 .addOnFailureListener(e -> {
                     android.util.Log.e("CONQUEST", "Failed to increment total XP", e);
                     Toast.makeText(this, "Failed to award XP: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
+    }
+
+    /** Show animated in-app XP celebration popup */
+    private void showXpPopup(int xp) {
+        xpPopupAmount.setText("+" + xp + " XP");
+        xpPopupOverlay.setVisibility(View.VISIBLE);
+
+        // Pop in animation
+        Animation inAnim = AnimationUtils.loadAnimation(this, R.anim.xp_popup_in);
+        xpPopup.startAnimation(inAnim);
+
+        // Auto-dismiss after 2.5 seconds
+        new Handler().postDelayed(this::dismissXpPopup, 2500);
+    }
+
+    private void dismissXpPopup() {
+        if (xpPopupOverlay.getVisibility() == View.VISIBLE) {
+            Animation outAnim = AnimationUtils.loadAnimation(this, R.anim.xp_popup_out);
+            outAnim.setAnimationListener(new Animation.AnimationListener() {
+                @Override public void onAnimationStart(Animation a) {}
+                @Override public void onAnimationRepeat(Animation a) {}
+                @Override public void onAnimationEnd(Animation a) {
+                    xpPopupOverlay.setVisibility(View.GONE);
+                }
+            });
+            xpPopup.startAnimation(outAnim);
+        }
     }
 
     @Override

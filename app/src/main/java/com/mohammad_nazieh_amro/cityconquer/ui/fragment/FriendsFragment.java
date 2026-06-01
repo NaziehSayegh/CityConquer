@@ -1,10 +1,9 @@
 package com.mohammad_nazieh_amro.cityconquer.ui.fragment;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -39,6 +37,15 @@ public class FriendsFragment extends Fragment {
     private List<User> friendsList = new ArrayList<>();
     private com.mohammad_nazieh_amro.cityconquer.adapter.FriendsAdapter adapter;
 
+    // Debounce handler for live search
+    private final Handler searchHandler = new Handler();
+    private Runnable searchRunnable;
+    private static final int SEARCH_DEBOUNCE_MS = 400;
+
+    // The found user from live search (to be added on button press)
+    private String foundUserId = null;
+    private String foundUsername = null;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -59,81 +66,174 @@ public class FriendsFragment extends Fragment {
         adapter = new com.mohammad_nazieh_amro.cityconquer.adapter.FriendsAdapter(friendsList);
         friendsRecycler.setAdapter(adapter);
 
-        // Clear status text when typing
+        // Live search as the user types — debounced by 400ms
         friendUsernameInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                searchStatusText.setVisibility(View.GONE);
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Cancel any pending search
+                if (searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+                foundUserId = null;
+                foundUsername = null;
+
+                String query = s.toString().trim();
+                if (query.length() < 2) {
+                    // Hide status when query is too short
+                    searchStatusText.setVisibility(View.GONE);
+                    return;
+                }
+
+                // Show "searching..." immediately
+                searchStatusText.setVisibility(View.VISIBLE);
+                searchStatusText.setTextColor(0x88FFFFFF);
+                searchStatusText.setText("🔍  Searching...");
+
+                // Debounce: fire search 400ms after user stops typing
+                searchRunnable = () -> liveSearchUser(query);
+                searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS);
             }
+
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        // Allow pressing search on keyboard to trigger add
+        // Allow pressing Search on keyboard to add the found user
         friendUsernameInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                addFriend();
+                addFoundFriend();
                 return true;
             }
             return false;
         });
 
-        addFriendBtn.setOnClickListener(v -> addFriend());
+        // Add button fires the add action (uses cached foundUserId if available)
+        addFriendBtn.setOnClickListener(v -> addFoundFriend());
+
         loadFriends();
         return view;
     }
 
-    private void addFriend() {
-        String username = friendUsernameInput.getText().toString().trim();
-        if (TextUtils.isEmpty(username)) {
-            searchStatusText.setVisibility(View.VISIBLE);
-            searchStatusText.setText("⚠ Enter a username to search.");
-            return;
-        }
+    /**
+     * Searches Firestore for a user matching the prefix query.
+     * Shows the result inline below the search bar.
+     */
+    private void liveSearchUser(String query) {
+        if (getContext() == null) return;
 
-        searchStatusText.setVisibility(View.VISIBLE);
-        searchStatusText.setText("Searching...");
-        addFriendBtn.setEnabled(false);
+        // Firestore doesn't support prefix search natively, so we use range query trick:
+        // query >= "abc" && query < "abd" to match any username starting with "abc"
+        String endQuery = query.substring(0, query.length() - 1)
+                + (char)(query.charAt(query.length() - 1) + 1);
 
         db.collection("users")
-                .whereEqualTo("username", username)
+                .whereGreaterThanOrEqualTo("username", query)
+                .whereLessThan("username", endQuery)
+                .limit(1)
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    addFriendBtn.setEnabled(true);
-                    if (queryDocumentSnapshots.isEmpty()) {
-                        searchStatusText.setText("❌ No user found with that username.");
+                .addOnSuccessListener(snapshots -> {
+                    if (getContext() == null) return;
+                    searchStatusText.setVisibility(View.VISIBLE);
+
+                    if (snapshots.isEmpty()) {
+                        foundUserId = null;
+                        foundUsername = null;
+                        searchStatusText.setTextColor(0xFFE94560);
+                        searchStatusText.setText("❌  No user found matching \"" + query + "\"");
                         return;
                     }
-                    String friendId = queryDocumentSnapshots.getDocuments().get(0).getId();
-                    if (friendId.equals(currentUserId)) {
-                        searchStatusText.setText("⚠ You can't add yourself!");
+
+                    String uid = snapshots.getDocuments().get(0).getId();
+                    String username = snapshots.getDocuments().get(0).getString("username");
+
+                    if (uid.equals(currentUserId)) {
+                        foundUserId = null;
+                        foundUsername = null;
+                        searchStatusText.setTextColor(0xFFFFAA00);
+                        searchStatusText.setText("⚠  That's you!");
                         return;
                     }
-                    // Check if already friends
+
+                    // Check if already a friend
                     boolean alreadyFriend = false;
                     for (User u : friendsList) {
-                        if (u.getId() != null && u.getId().equals(friendId)) {
+                        if (u.getId() != null && u.getId().equals(uid)) {
                             alreadyFriend = true;
                             break;
                         }
                     }
+
+                    foundUserId = uid;
+                    foundUsername = username;
+
                     if (alreadyFriend) {
-                        searchStatusText.setText("✅ Already in your friends list!");
-                        return;
+                        searchStatusText.setTextColor(0xFF00BCD4);
+                        searchStatusText.setText("✅  " + username + " is already your friend!");
+                    } else {
+                        searchStatusText.setTextColor(0xFF00E676);
+                        searchStatusText.setText("👤  Found: " + username + "  — press Add to add!");
                     }
-                    db.collection("users").document(currentUserId)
-                            .update("friends", FieldValue.arrayUnion(friendId))
-                            .addOnSuccessListener(unused -> {
-                                searchStatusText.setText("✅ Friend added successfully!");
-                                friendUsernameInput.setText("");
-                                loadFriends();
-                            })
-                            .addOnFailureListener(e -> {
-                                searchStatusText.setText("❌ Failed: " + e.getMessage());
-                            });
                 })
                 .addOnFailureListener(e -> {
+                    if (getContext() == null) return;
+                    searchStatusText.setVisibility(View.VISIBLE);
+                    searchStatusText.setTextColor(0xFFE94560);
+                    searchStatusText.setText("❌  Error: " + e.getMessage());
+                });
+    }
+
+    /**
+     * Adds the currently found user (from live search) as a friend.
+     */
+    private void addFoundFriend() {
+        String query = friendUsernameInput.getText().toString().trim();
+        if (query.isEmpty()) {
+            searchStatusText.setVisibility(View.VISIBLE);
+            searchStatusText.setTextColor(0xFFFFAA00);
+            searchStatusText.setText("⚠  Enter a username to search.");
+            return;
+        }
+
+        if (foundUserId == null) {
+            // Trigger a fresh search first
+            liveSearchUser(query);
+            searchStatusText.setVisibility(View.VISIBLE);
+            searchStatusText.setTextColor(0xFFFFAA00);
+            searchStatusText.setText("⚠  Wait for search result before adding.");
+            return;
+        }
+
+        // Check if already a friend
+        for (User u : friendsList) {
+            if (u.getId() != null && u.getId().equals(foundUserId)) {
+                searchStatusText.setVisibility(View.VISIBLE);
+                searchStatusText.setTextColor(0xFF00BCD4);
+                searchStatusText.setText("✅  " + foundUsername + " is already your friend!");
+                return;
+            }
+        }
+
+        addFriendBtn.setEnabled(false);
+        db.collection("users").document(currentUserId)
+                .update("friends", FieldValue.arrayUnion(foundUserId))
+                .addOnSuccessListener(unused -> {
+                    if (getContext() == null) return;
                     addFriendBtn.setEnabled(true);
-                    searchStatusText.setText("❌ Error: " + e.getMessage());
+                    searchStatusText.setVisibility(View.VISIBLE);
+                    searchStatusText.setTextColor(0xFF00E676);
+                    searchStatusText.setText("✅  " + foundUsername + " added successfully!");
+                    friendUsernameInput.setText("");
+                    foundUserId = null;
+                    foundUsername = null;
+                    loadFriends();
+                })
+                .addOnFailureListener(e -> {
+                    if (getContext() == null) return;
+                    addFriendBtn.setEnabled(true);
+                    searchStatusText.setVisibility(View.VISIBLE);
+                    searchStatusText.setTextColor(0xFFE94560);
+                    searchStatusText.setText("❌  Failed: " + e.getMessage());
                 });
     }
 
@@ -141,6 +241,7 @@ public class FriendsFragment extends Fragment {
         db.collection("users").document(currentUserId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
+                    if (getContext() == null) return;
                     List<String> friendIds = (List<String>) documentSnapshot.get("friends");
                     if (friendIds == null || friendIds.isEmpty()) {
                         friendsList.clear();
@@ -155,6 +256,7 @@ public class FriendsFragment extends Fragment {
                         db.collection("users").document(friendId)
                                 .get()
                                 .addOnSuccessListener(friendDoc -> {
+                                    if (getContext() == null) return;
                                     User friend = friendDoc.toObject(User.class);
                                     if (friend != null) {
                                         friend.setId(friendDoc.getId());
@@ -185,6 +287,15 @@ public class FriendsFragment extends Fragment {
             emptyState.setVisibility(View.GONE);
             friendsRecycler.setVisibility(View.VISIBLE);
             friendsCountBadge.setText(count + (count == 1 ? " Friend" : " Friends"));
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Cancel any pending searches when view is destroyed
+        if (searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
         }
     }
 }

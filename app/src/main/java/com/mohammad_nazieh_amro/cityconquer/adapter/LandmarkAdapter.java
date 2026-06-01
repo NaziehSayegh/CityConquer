@@ -35,16 +35,21 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.ViewHo
         Landmark landmark = landmarks.get(position);
         holder.name.setText(landmark.getName());
         holder.description.setText(landmark.getDescription());
-        holder.xp.setText("+" + landmark.getXp() + " XP");
+        // XP badge only shows the number — "XP" label is in the layout XML
+        holder.xp.setText("+" + landmark.getXp());
 
         if (landmark.isConquered()) {
             holder.statusIcon.setText("✅");
-            holder.status.setText("Conquered · " + landmark.getXp() + " XP");
+            holder.status.setText("Conquered  ·  " + landmark.getXp() + " XP earned");
             holder.status.setTextColor(0xFF00BCD4);
+            // Green accent bar for conquered
+            holder.statusBar.setBackgroundColor(0xFF00BCD4);
         } else {
             holder.statusIcon.setText("🔒");
-            holder.status.setText("Not conquered");
-            holder.status.setTextColor(0xFF888888);
+            holder.status.setText("Tap to explore and conquer");
+            holder.status.setTextColor(0xFF666666);
+            // Grey bar for locked
+            holder.statusBar.setBackgroundColor(0xFF333344);
         }
 
         holder.itemView.setOnClickListener(v -> {
@@ -71,6 +76,7 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView name, description, xp, status, statusIcon;
+        View statusBar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -79,6 +85,7 @@ public class LandmarkAdapter extends RecyclerView.Adapter<LandmarkAdapter.ViewHo
             xp = itemView.findViewById(R.id.landmark_xp);
             status = itemView.findViewById(R.id.landmark_status);
             statusIcon = itemView.findViewById(R.id.landmark_status_icon);
+            statusBar = itemView.findViewById(R.id.status_bar);
         }
     }
 }

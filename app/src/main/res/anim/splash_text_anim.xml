@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<alpha xmlns:android="http://schemas.android.com/apk/res/android"
-    android:fromAlpha="0.0"
-    android:toAlpha="1.0"
-    android:duration="900"
-    android:startOffset="400"
-    android:fillAfter="true"/>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <alpha
+        android:fromAlpha="0.0"
+        android:toAlpha="1.0"
+        android:duration="700"
+        android:startOffset="600"
+        android:interpolator="@android:anim/decelerate_interpolator"
+        android:fillAfter="true"/>
+    <translate
+        android:fromYDelta="12dp"
+        android:toYDelta="0"
+        android:duration="700"
+        android:startOffset="600"
+        android:interpolator="@android:anim/decelerate_interpolator"
+        android:fillAfter="true"/>
+</set>
