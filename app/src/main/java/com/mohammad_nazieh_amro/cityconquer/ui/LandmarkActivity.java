@@ -30,6 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.mohammad_nazieh_amro.cityconquer.R;
+import com.mohammad_nazieh_amro.cityconquer.util.LevelSystem;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -52,6 +53,9 @@ public class LandmarkActivity extends AppCompatActivity {
     private FrameLayout xpPopupOverlay;
     private LinearLayout xpPopup;
     private TextView xpPopupAmount;
+    private FrameLayout levelupPopupOverlay;
+    private LinearLayout levelupPopup;
+    private TextView levelupNewLevelText, levelupNextXpText;
 
     private String landmarkId, cityId, currentPhotoPath;
     private double landmarkLat, landmarkLng;
@@ -87,6 +91,10 @@ public class LandmarkActivity extends AppCompatActivity {
         xpPopupOverlay = findViewById(R.id.xp_popup_overlay);
         xpPopup = findViewById(R.id.xp_popup);
         xpPopupAmount = findViewById(R.id.xp_popup_amount);
+        levelupPopupOverlay = findViewById(R.id.levelup_popup_overlay);
+        levelupPopup = findViewById(R.id.levelup_popup);
+        levelupNewLevelText = findViewById(R.id.levelup_new_level_text);
+        levelupNextXpText = findViewById(R.id.levelup_next_xp_text);
 
         landmarkId = getIntent().getStringExtra("landmarkId");
         cityId = getIntent().getStringExtra("cityId");
@@ -107,8 +115,10 @@ public class LandmarkActivity extends AppCompatActivity {
 
         conquestBtn.setOnClickListener(v -> checkLocationAndConquer());
 
-        // Tap popup to dismiss
+        // Tap XP popup to dismiss
         xpPopupOverlay.setOnClickListener(v -> dismissXpPopup());
+        // Tap level-up popup to dismiss
+        levelupPopupOverlay.setOnClickListener(v -> dismissLevelupPopup());
     }
 
     private void checkIfAlreadyConquered() {
@@ -282,20 +292,50 @@ public class LandmarkActivity extends AppCompatActivity {
                     Toast.makeText(this, "Error checking conquest state: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
 
-        // Update user total XP and show in-app popup
-        db.collection("users").document(userId)
-                .update("totalXP",
-                        com.google.firebase.firestore.FieldValue.increment(landmarkXp))
-                .addOnSuccessListener(unused -> {
-                    statusText.setText("🏆 Landmark Conquered!");
-                    conquestBtn.setEnabled(false);
-                    conquestBtn.setText("Already Conquered ✅");
-                    // Show the in-app XP celebration popup
-                    showXpPopup(landmarkXp);
+        // Update user total XP, check level-up, and show in-app popup
+        String uid = userId;
+        db.collection("users").document(uid)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    int currentXP = userDoc.getLong("totalXP") != null
+                            ? userDoc.getLong("totalXP").intValue() : 0;
+                    int currentLevel = userDoc.getLong("level") != null
+                            ? userDoc.getLong("level").intValue() : 1;
+
+                    int newXP = currentXP + landmarkXp;
+                    int newLevel = LevelSystem.getLevelForXP(newXP);
+
+                    Map<String, Object> xpUpdate = new HashMap<>();
+                    xpUpdate.put("totalXP", newXP);
+                    if (newLevel > currentLevel) {
+                        xpUpdate.put("level", newLevel);
+                    }
+
+                    db.collection("users").document(uid)
+                            .update(xpUpdate)
+                            .addOnSuccessListener(unused -> {
+                                statusText.setText("🏆 Landmark Conquered!");
+                                conquestBtn.setEnabled(false);
+                                conquestBtn.setText("Already Conquered ✅");
+
+                                if (newLevel > currentLevel) {
+                                    // Level up! Show level-up popup first, then XP popup
+                                    showLevelupPopup(newLevel, LevelSystem.getXPToNextLevel(newXP));
+                                } else {
+                                    showXpPopup(landmarkXp);
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                android.util.Log.e("CONQUEST", "Failed to update XP/level", e);
+                                Toast.makeText(this, "Failed to award XP: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            });
                 })
                 .addOnFailureListener(e -> {
-                    android.util.Log.e("CONQUEST", "Failed to increment total XP", e);
-                    Toast.makeText(this, "Failed to award XP: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    android.util.Log.e("CONQUEST", "Failed to read user XP for level check", e);
+                    // Fallback: still increment XP even if level check failed
+                    db.collection("users").document(uid)
+                            .update("totalXP", com.google.firebase.firestore.FieldValue.increment(landmarkXp))
+                            .addOnSuccessListener(u -> showXpPopup(landmarkXp));
                 });
     }
 
@@ -324,6 +364,29 @@ public class LandmarkActivity extends AppCompatActivity {
             });
             xpPopup.startAnimation(outAnim);
         }
+    }
+
+    /** Show the level-up celebration popup, then auto-show XP popup after it's dismissed */
+    private void showLevelupPopup(int newLevel, int xpToNext) {
+        levelupNewLevelText.setText("You are now Level " + newLevel + "! 🎉");
+        if (xpToNext > 0) {
+            levelupNextXpText.setText(xpToNext + " XP to next level");
+        } else {
+            levelupNextXpText.setText("You've reached the maximum level! 👑");
+        }
+        levelupPopupOverlay.setVisibility(View.VISIBLE);
+        Animation inAnim = AnimationUtils.loadAnimation(this, R.anim.levelup_popup_in);
+        levelupPopup.startAnimation(inAnim);
+
+        // After 3s, dismiss level-up and show XP popup
+        new Handler().postDelayed(() -> {
+            dismissLevelupPopup();
+            new Handler().postDelayed(() -> showXpPopup(landmarkXp), 200);
+        }, 3000);
+    }
+
+    private void dismissLevelupPopup() {
+        levelupPopupOverlay.setVisibility(View.GONE);
     }
 
     @Override

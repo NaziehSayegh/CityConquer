@@ -288,4 +288,62 @@
 
     </FrameLayout>
 
+    <!-- Level Up Popup Overlay -->
+    <FrameLayout
+        android:id="@+id/levelup_popup_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#BB000000"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/levelup_popup"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/levelup_popup_bg"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="36dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⬆️"
+                android:textSize="56sp"
+                android:layout_marginBottom="6dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LEVEL UP!"
+                android:textColor="#E94560"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"/>
+
+            <TextView
+                android:id="@+id/levelup_new_level_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="You are now Level 2"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/levelup_next_xp_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="500 XP to next level"
+                android:textColor="#AAAAAA"
+                android:textSize="13sp"/>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
 </FrameLayout>
