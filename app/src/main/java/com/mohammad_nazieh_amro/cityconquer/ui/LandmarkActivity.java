@@ -101,6 +101,15 @@ public class LandmarkActivity extends AppCompatActivity {
                             statusText.setText("🏆 Already Conquered!");
                             conquestBtn.setEnabled(false);
                             conquestBtn.setText("Already Conquered ✅");
+
+                            // Load the saved photo
+                            if (doc.get("photos") != null) {
+                                Map<String, String> photos = (Map<String, String>) doc.get("photos");
+                                String savedPhotoUrl = photos.get(landmarkId);
+                                if (savedPhotoUrl != null && !savedPhotoUrl.isEmpty()) {
+                                    Glide.with(this).load(savedPhotoUrl).into(landmarkImage);
+                                }
+                            }
                         }
                     }
                 });
@@ -200,11 +209,13 @@ public class LandmarkActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("completedLandmarks", com.google.firebase.firestore.FieldValue.arrayUnion(landmarkId));
+                        updates.put("photos." + landmarkId, photoUrl);
+
                         db.collection("users").document(userId)
                                 .collection("conquests").document(cityId)
-                                .update("completedLandmarks",
-                                        com.google.firebase.firestore.FieldValue
-                                                .arrayUnion(landmarkId))
+                                .update(updates)
                                 .addOnFailureListener(e -> {
                                     android.util.Log.e("CONQUEST", "Failed to update completed landmarks list", e);
                                     Toast.makeText(this, "Failed to update conquest list: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -213,6 +224,10 @@ public class LandmarkActivity extends AppCompatActivity {
                         Map<String, Object> conquest = new HashMap<>();
                         conquest.put("completedLandmarks", Arrays.asList(landmarkId));
                         conquest.put("cityXP", 0);
+                        Map<String, String> photos = new HashMap<>();
+                        photos.put(landmarkId, photoUrl);
+                        conquest.put("photos", photos);
+
                         db.collection("users").document(userId)
                                 .collection("conquests").document(cityId)
                                 .set(conquest)
