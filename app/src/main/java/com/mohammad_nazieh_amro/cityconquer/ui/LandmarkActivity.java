@@ -42,12 +42,13 @@ public class LandmarkActivity extends AppCompatActivity {
     private TextView landmarkName, landmarkDescription, statusText;
     private ImageView landmarkImage;
     private Button conquestBtn;
-    private TextView distanceText, radiusText, xpBadge;
+    private TextView distanceText, radiusText, xpBadge, distanceLabel;
 
     private String landmarkId, cityId, currentPhotoPath;
     private double landmarkLat, landmarkLng;
     private int landmarkXp = 100;
     private Uri photoUri;
+    private int lastCheckedDistance = 0;
 
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
@@ -73,6 +74,7 @@ public class LandmarkActivity extends AppCompatActivity {
         distanceText = findViewById(R.id.distance_text);
         radiusText = findViewById(R.id.radius_text);
         xpBadge = findViewById(R.id.landmark_xp_badge);
+        distanceLabel = findViewById(R.id.distance_label);
 
         landmarkId = getIntent().getStringExtra("landmarkId");
         cityId = getIntent().getStringExtra("cityId");
@@ -114,6 +116,16 @@ public class LandmarkActivity extends AppCompatActivity {
                                 String savedPhotoUrl = photos.get(landmarkId);
                                 if (savedPhotoUrl != null && !savedPhotoUrl.isEmpty()) {
                                     Glide.with(this).load(savedPhotoUrl).into(landmarkImage);
+                                }
+                            }
+
+                            // Load the saved conquered distance
+                            if (doc.get("conqueredDistances") != null) {
+                                Map<String, Object> distances = (Map<String, Object>) doc.get("conqueredDistances");
+                                Object savedDistance = distances.get(landmarkId);
+                                if (savedDistance != null) {
+                                    distanceLabel.setText("Conquered At");
+                                    distanceText.setText(savedDistance.toString() + " m");
                                 }
                             }
                         }
@@ -198,20 +210,20 @@ public class LandmarkActivity extends AppCompatActivity {
         ref.putFile(photoUri)
                 .addOnSuccessListener(taskSnapshot ->
                         ref.getDownloadUrl().addOnSuccessListener(uri ->
-                                markAsConquered(userId, uri.toString()))
+                                markAsConquered(userId, uri.toString(), lastCheckedDistance))
                         .addOnFailureListener(e -> {
                             android.util.Log.w("CONQUEST", "Failed to get download URL, falling back to local photo reference", e);
                             Toast.makeText(this, "Using local link: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            markAsConquered(userId, photoUri.toString());
+                            markAsConquered(userId, photoUri.toString(), lastCheckedDistance);
                         }))
                 .addOnFailureListener(e -> {
                     android.util.Log.w("CONQUEST", "Firebase Storage upload failed/disabled. Falling back to local reference to allow conquest!", e);
                     Toast.makeText(this, "Firebase Storage offline/unpaid. Conquering using local photo reference! 📸🏆", Toast.LENGTH_LONG).show();
-                    markAsConquered(userId, photoUri.toString());
+                    markAsConquered(userId, photoUri.toString(), lastCheckedDistance);
                 });
     }
 
-    private void markAsConquered(String userId, String photoUrl) {
+    private void markAsConquered(String userId, String photoUrl, int conqueredDistance) {
         // Mark landmark as conquered
         db.collection("users").document(userId)
                 .collection("conquests").document(cityId)
@@ -221,6 +233,7 @@ public class LandmarkActivity extends AppCompatActivity {
                         Map<String, Object> updates = new HashMap<>();
                         updates.put("completedLandmarks", com.google.firebase.firestore.FieldValue.arrayUnion(landmarkId));
                         updates.put("photos." + landmarkId, photoUrl);
+                        updates.put("conqueredDistances." + landmarkId, conqueredDistance);
 
                         db.collection("users").document(userId)
                                 .collection("conquests").document(cityId)
@@ -236,6 +249,10 @@ public class LandmarkActivity extends AppCompatActivity {
                         Map<String, String> photos = new HashMap<>();
                         photos.put(landmarkId, photoUrl);
                         conquest.put("photos", photos);
+
+                        Map<String, Integer> distances = new HashMap<>();
+                        distances.put(landmarkId, conqueredDistance);
+                        conquest.put("conqueredDistances", distances);
 
                         db.collection("users").document(userId)
                                 .collection("conquests").document(cityId)
