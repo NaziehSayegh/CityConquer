@@ -18,6 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:background="#16213E"
+            android:elevation="4dp"
             app:title="CityConquer"
             app:titleTextColor="#FFFFFF"/>
 
@@ -36,9 +37,11 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:background="#16213E"
+            android:elevation="8dp"
             app:menu="@menu/bottom_nav_menu"
-            app:itemIconTint="#E94560"
-            app:itemTextColor="#FFFFFF"/>
+            app:itemIconTint="@color/bottom_nav_tint"
+            app:itemTextColor="@color/bottom_nav_tint"
+            app:labelVisibilityMode="labeled"/>
 
     </RelativeLayout>
 

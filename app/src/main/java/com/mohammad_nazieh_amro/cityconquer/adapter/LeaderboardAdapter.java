@@ -31,13 +31,19 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         User user = users.get(position);
         holder.rank.setText("#" + (position + 1));
         holder.username.setText(user.getUsername() != null ? user.getUsername() : "Player");
-        holder.xp.setText(user.getTotalXP() + " XP");
+        holder.xp.setText(String.valueOf(user.getTotalXP()));
+        holder.level.setText("Level " + user.getLevel());
 
-        // Gold, Silver, Bronze colors
-        if (position == 0) holder.rank.setTextColor(0xFFFFD700);
-        else if (position == 1) holder.rank.setTextColor(0xFFC0C0C0);
-        else if (position == 2) holder.rank.setTextColor(0xFFCD7F32);
-        else holder.rank.setTextColor(0xFFFFFFFF);
+        // Gold, Silver, Bronze colors for rank badge background color
+        if (position == 0) {
+            holder.rank.setTextColor(0xFFFFD700); // Gold
+        } else if (position == 1) {
+            holder.rank.setTextColor(0xFFC0C0C0); // Silver
+        } else if (position == 2) {
+            holder.rank.setTextColor(0xFFCD7F32); // Bronze
+        } else {
+            holder.rank.setTextColor(0xFFFFFFFF);
+        }
     }
 
     @Override
@@ -51,13 +57,14 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView rank, username, xp;
+        TextView rank, username, xp, level;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             rank = itemView.findViewById(R.id.rank_text);
             username = itemView.findViewById(R.id.username_text);
             xp = itemView.findViewById(R.id.xp_text);
+            level = itemView.findViewById(R.id.level_text);
         }
     }
 }

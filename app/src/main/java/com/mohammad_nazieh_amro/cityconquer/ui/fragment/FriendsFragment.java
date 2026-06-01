@@ -1,12 +1,18 @@
 package com.mohammad_nazieh_amro.cityconquer.ui.fragment;
 
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,6 +32,8 @@ public class FriendsFragment extends Fragment {
     private EditText friendUsernameInput;
     private Button addFriendBtn;
     private RecyclerView friendsRecycler;
+    private TextView searchStatusText, friendsCountBadge;
+    private LinearLayout emptyState;
     private FirebaseFirestore db;
     private String currentUserId;
     private List<User> friendsList = new ArrayList<>();
@@ -39,13 +47,35 @@ public class FriendsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_friends, container, false);
         db = FirebaseFirestore.getInstance();
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         friendUsernameInput = view.findViewById(R.id.friend_username_input);
         addFriendBtn = view.findViewById(R.id.add_friend_btn);
         friendsRecycler = view.findViewById(R.id.friends_recycler);
-        friendsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        searchStatusText = view.findViewById(R.id.search_status_text);
+        friendsCountBadge = view.findViewById(R.id.friends_count_badge);
+        emptyState = view.findViewById(R.id.empty_state);
 
+        friendsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new com.mohammad_nazieh_amro.cityconquer.adapter.FriendsAdapter(friendsList);
         friendsRecycler.setAdapter(adapter);
+
+        // Clear status text when typing
+        friendUsernameInput.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchStatusText.setVisibility(View.GONE);
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        // Allow pressing search on keyboard to trigger add
+        friendUsernameInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                addFriend();
+                return true;
+            }
+            return false;
+        });
 
         addFriendBtn.setOnClickListener(v -> addFriend());
         loadFriends();
@@ -55,29 +85,55 @@ public class FriendsFragment extends Fragment {
     private void addFriend() {
         String username = friendUsernameInput.getText().toString().trim();
         if (TextUtils.isEmpty(username)) {
-            Toast.makeText(getContext(), "Enter a username!", Toast.LENGTH_SHORT).show();
+            searchStatusText.setVisibility(View.VISIBLE);
+            searchStatusText.setText("⚠ Enter a username to search.");
             return;
         }
+
+        searchStatusText.setVisibility(View.VISIBLE);
+        searchStatusText.setText("Searching...");
+        addFriendBtn.setEnabled(false);
+
         db.collection("users")
                 .whereEqualTo("username", username)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    addFriendBtn.setEnabled(true);
                     if (queryDocumentSnapshots.isEmpty()) {
-                        Toast.makeText(getContext(), "User not found!", Toast.LENGTH_SHORT).show();
+                        searchStatusText.setText("❌ No user found with that username.");
                         return;
                     }
                     String friendId = queryDocumentSnapshots.getDocuments().get(0).getId();
                     if (friendId.equals(currentUserId)) {
-                        Toast.makeText(getContext(), "You can't add yourself!", Toast.LENGTH_SHORT).show();
+                        searchStatusText.setText("⚠ You can't add yourself!");
+                        return;
+                    }
+                    // Check if already friends
+                    boolean alreadyFriend = false;
+                    for (User u : friendsList) {
+                        if (u.getId() != null && u.getId().equals(friendId)) {
+                            alreadyFriend = true;
+                            break;
+                        }
+                    }
+                    if (alreadyFriend) {
+                        searchStatusText.setText("✅ Already in your friends list!");
                         return;
                     }
                     db.collection("users").document(currentUserId)
                             .update("friends", FieldValue.arrayUnion(friendId))
                             .addOnSuccessListener(unused -> {
-                                Toast.makeText(getContext(), "Friend added! ✅", Toast.LENGTH_SHORT).show();
+                                searchStatusText.setText("✅ Friend added successfully!");
                                 friendUsernameInput.setText("");
                                 loadFriends();
+                            })
+                            .addOnFailureListener(e -> {
+                                searchStatusText.setText("❌ Failed: " + e.getMessage());
                             });
+                })
+                .addOnFailureListener(e -> {
+                    addFriendBtn.setEnabled(true);
+                    searchStatusText.setText("❌ Error: " + e.getMessage());
                 });
     }
 
@@ -89,6 +145,7 @@ public class FriendsFragment extends Fragment {
                     if (friendIds == null || friendIds.isEmpty()) {
                         friendsList.clear();
                         adapter.updateList(friendsList);
+                        updateEmptyState();
                         return;
                     }
                     friendsList.clear();
@@ -105,14 +162,29 @@ public class FriendsFragment extends Fragment {
                                     }
                                     if (loadedCount.incrementAndGet() == totalFriends) {
                                         adapter.updateList(friendsList);
+                                        updateEmptyState();
                                     }
                                 })
                                 .addOnFailureListener(e -> {
                                     if (loadedCount.incrementAndGet() == totalFriends) {
                                         adapter.updateList(friendsList);
+                                        updateEmptyState();
                                     }
                                 });
                     }
                 });
+    }
+
+    private void updateEmptyState() {
+        int count = friendsList.size();
+        if (count == 0) {
+            emptyState.setVisibility(View.VISIBLE);
+            friendsRecycler.setVisibility(View.GONE);
+            friendsCountBadge.setText("0 Friends");
+        } else {
+            emptyState.setVisibility(View.GONE);
+            friendsRecycler.setVisibility(View.VISIBLE);
+            friendsCountBadge.setText(count + (count == 1 ? " Friend" : " Friends"));
+        }
     }
 }

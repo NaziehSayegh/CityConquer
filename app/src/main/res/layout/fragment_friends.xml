@@ -5,11 +5,13 @@
     android:background="@color/primary_dark"
     android:orientation="vertical">
 
+    <!-- Header -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="60dp"
         android:background="@color/primary"
-        android:padding="8dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -17,68 +19,156 @@
             android:layout_centerVertical="true"
             android:text="Friends"
             android:textColor="@color/white"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold"/>
 
         <TextView
-            android:id="@+id/add_friend_label"
+            android:id="@+id/friends_count_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:text="+ Add"
-            android:textColor="@color/accent"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:padding="8dp"/>
+            android:background="@drawable/xp_badge_gradient"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:text="0 Friends"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"/>
 
     </RelativeLayout>
 
+    <!-- Search / Add Friend Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_glass"
+        android:orientation="vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔍  Find &amp; Add Friends"
+            android:textColor="@color/accent"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/friend_username_input"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_toStartOf="@+id/add_friend_btn"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/input_background"
+                android:hint="Search by username..."
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="#555555"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:textSize="15sp"/>
+
+            <Button
+                android:id="@+id/add_friend_btn"
+                android:layout_width="80dp"
+                android:layout_height="52dp"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/button_background"
+                android:text="Add"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="14sp"/>
+
+        </RelativeLayout>
+
+        <!-- Search result feedback -->
+        <TextView
+            android:id="@+id/search_status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#88FFFFFF"
+            android:textSize="12sp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+    <!-- My Friends Label -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary"
-        android:padding="12dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="8dp">
 
-        <EditText
-            android:id="@+id/friend_username_input"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_toStartOf="@+id/add_friend_btn"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/input_background"
-            android:hint="Search friends..."
-            android:paddingStart="16dp"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="My Friends"
             android:textColor="@color/white"
-            android:textColorHint="@color/grey"/>
-
-        <Button
-            android:id="@+id/add_friend_btn"
-            android:layout_width="80dp"
-            android:layout_height="48dp"
-            android:layout_alignParentEnd="true"
-            android:background="@drawable/button_background"
-            android:text="Add"
-            android:textColor="@color/white"/>
+            android:textSize="16sp"
+            android:textStyle="bold"/>
 
     </RelativeLayout>
 
-    <TextView
+    <!-- Empty state -->
+    <LinearLayout
+        android:id="@+id/empty_state"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="My Friends"
-        android:textColor="@color/accent"
-        android:textSize="16sp"
-        android:textStyle="bold"/>
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="40dp"
+        android:visibility="gone">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="👥"
+            android:textSize="48sp"
+            android:layout_marginBottom="12dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No friends yet!"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Search for a username above to add friends."
+            android:textColor="@color/grey"
+            android:textSize="13sp"
+            android:gravity="center"/>
+
+    </LinearLayout>
+
+    <!-- Friends RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/friends_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp"/>
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        android:clipToPadding="false"/>
 
 </LinearLayout>

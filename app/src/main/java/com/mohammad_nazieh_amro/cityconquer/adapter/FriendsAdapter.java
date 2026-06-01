@@ -29,8 +29,12 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User friend = friends.get(position);
-        holder.username.setText(friend.getUsername() != null ? friend.getUsername() : "Friend");
-        holder.xp.setText(friend.getTotalXP() + " XP (Lvl " + friend.getLevel() + ")");
+        String name = friend.getUsername() != null ? friend.getUsername() : "Friend";
+        holder.username.setText(name);
+        // Show first letter of username as avatar initial
+        holder.avatarInitial.setText(name.substring(0, 1).toUpperCase());
+        holder.level.setText("Level " + friend.getLevel());
+        holder.xp.setText(String.valueOf(friend.getTotalXP()));
     }
 
     @Override
@@ -44,12 +48,14 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView username, xp;
+        TextView username, xp, level, avatarInitial;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             username = itemView.findViewById(R.id.username_text);
             xp = itemView.findViewById(R.id.xp_text);
+            level = itemView.findViewById(R.id.level_text);
+            avatarInitial = itemView.findViewById(R.id.avatar_initial);
         }
     }
 }

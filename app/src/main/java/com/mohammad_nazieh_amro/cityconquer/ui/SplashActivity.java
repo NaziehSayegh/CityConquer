@@ -3,6 +3,10 @@ package com.mohammad_nazieh_amro.cityconquer.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -15,6 +19,24 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+        // Hide the action bar for immersive splash
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
+        ImageView logo = findViewById(R.id.logo);
+        TextView appName = findViewById(R.id.app_name);
+        TextView tagline = findViewById(R.id.tagline);
+
+        // Load and start animations
+        Animation logoAnim = AnimationUtils.loadAnimation(this, R.anim.splash_logo_anim);
+        Animation textAnim = AnimationUtils.loadAnimation(this, R.anim.splash_text_anim);
+        Animation taglineAnim = AnimationUtils.loadAnimation(this, R.anim.splash_tagline_anim);
+
+        logo.startAnimation(logoAnim);
+        appName.startAnimation(textAnim);
+        tagline.startAnimation(taglineAnim);
 
         new Handler().postDelayed(() -> {
             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
