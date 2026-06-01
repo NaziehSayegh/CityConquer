@@ -180,9 +180,15 @@ public class LandmarkActivity extends AppCompatActivity {
         ref.putFile(photoUri)
                 .addOnSuccessListener(taskSnapshot ->
                         ref.getDownloadUrl().addOnSuccessListener(uri ->
-                                markAsConquered(userId, uri.toString())))
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Upload failed!", Toast.LENGTH_SHORT).show());
+                                markAsConquered(userId, uri.toString()))
+                        .addOnFailureListener(e -> {
+                            android.util.Log.e("CONQUEST", "Failed to get download URL", e);
+                            Toast.makeText(this, "Failed to get image link: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }))
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("CONQUEST", "Failed to upload image", e);
+                    Toast.makeText(this, "Upload failed: " + e.getMessage() + "\nVerify Firebase Storage rules/bucket!", Toast.LENGTH_LONG).show();
+                });
     }
 
     private void markAsConquered(String userId, String photoUrl) {
@@ -196,15 +202,27 @@ public class LandmarkActivity extends AppCompatActivity {
                                 .collection("conquests").document(cityId)
                                 .update("completedLandmarks",
                                         com.google.firebase.firestore.FieldValue
-                                                .arrayUnion(landmarkId));
+                                                .arrayUnion(landmarkId))
+                                .addOnFailureListener(e -> {
+                                    android.util.Log.e("CONQUEST", "Failed to update completed landmarks list", e);
+                                    Toast.makeText(this, "Failed to update conquest list: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                });
                     } else {
                         Map<String, Object> conquest = new HashMap<>();
                         conquest.put("completedLandmarks", Arrays.asList(landmarkId));
                         conquest.put("cityXP", 0);
                         db.collection("users").document(userId)
                                 .collection("conquests").document(cityId)
-                                .set(conquest);
+                                .set(conquest)
+                                .addOnFailureListener(e -> {
+                                    android.util.Log.e("CONQUEST", "Failed to set first completed landmark doc", e);
+                                    Toast.makeText(this, "Failed to create conquest entry: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                });
                     }
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("CONQUEST", "Failed to check existing conquest doc", e);
+                    Toast.makeText(this, "Error checking conquest state: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
 
         // Update user total XP
@@ -218,6 +236,10 @@ public class LandmarkActivity extends AppCompatActivity {
                     Toast.makeText(this,
                             "+" + landmarkXp + " XP! Keep exploring! 🌍",
                             Toast.LENGTH_LONG).show();
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("CONQUEST", "Failed to increment total XP", e);
+                    Toast.makeText(this, "Failed to award XP: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
