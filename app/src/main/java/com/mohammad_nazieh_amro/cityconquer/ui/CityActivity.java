@@ -47,6 +47,14 @@ public class CityActivity extends AppCompatActivity {
         loadLandmarks();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (cityId != null && adapter != null) {
+            updateProgress();
+        }
+    }
+
     private void loadLandmarks() {
         db.collection("cities").document(cityId)
                 .collection("landmarks")

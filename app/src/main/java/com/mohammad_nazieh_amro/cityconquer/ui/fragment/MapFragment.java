@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -46,6 +48,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         if (ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
+
+            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
+            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) {
+                    LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f));
+                } else {
+                    LatLng jerusalem = new LatLng(31.7767, 35.2345);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(jerusalem, 13));
+                }
+            });
+        } else {
+            LatLng jerusalem = new LatLng(31.7767, 35.2345);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(jerusalem, 13));
         }
 
         loadLandmarkMarkers();
@@ -75,9 +91,5 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                 });
                     }
                 });
-
-        // Default camera to Jerusalem
-        LatLng jerusalem = new LatLng(31.7767, 35.2345);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(jerusalem, 13));
     }
 }

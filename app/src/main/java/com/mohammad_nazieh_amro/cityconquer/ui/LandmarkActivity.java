@@ -42,6 +42,7 @@ public class LandmarkActivity extends AppCompatActivity {
     private TextView landmarkName, landmarkDescription, statusText;
     private ImageView landmarkImage;
     private Button conquestBtn;
+    private TextView distanceText, radiusText, xpBadge;
 
     private String landmarkId, cityId, currentPhotoPath;
     private double landmarkLat, landmarkLng;
@@ -69,6 +70,9 @@ public class LandmarkActivity extends AppCompatActivity {
         landmarkImage = findViewById(R.id.landmark_image);
         statusText = findViewById(R.id.status_text);
         conquestBtn = findViewById(R.id.conquest_btn);
+        distanceText = findViewById(R.id.distance_text);
+        radiusText = findViewById(R.id.radius_text);
+        xpBadge = findViewById(R.id.landmark_xp_badge);
 
         landmarkId = getIntent().getStringExtra("landmarkId");
         cityId = getIntent().getStringExtra("cityId");
@@ -81,6 +85,8 @@ public class LandmarkActivity extends AppCompatActivity {
 
         landmarkName.setText(name);
         landmarkDescription.setText(description);
+        xpBadge.setText("+" + landmarkXp + " XP");
+        radiusText.setText((int) maxDistanceMeters + " m");
 
         // Check if already conquered
         checkIfAlreadyConquered();
@@ -133,11 +139,14 @@ public class LandmarkActivity extends AppCompatActivity {
             Location.distanceBetween(location.getLatitude(), location.getLongitude(),
                     landmarkLat, landmarkLng, results);
 
+            int distance = (int) results[0];
+            distanceText.setText(distance + " m");
+
             if (results[0] <= maxDistanceMeters) {
                 statusText.setText("✅ You're here! Take a photo to conquer!");
                 openCamera();
             } else {
-                statusText.setText("❌ You're " + (int) results[0] + "m away. Get closer!");
+                statusText.setText("❌ You're " + distance + "m away. Get closer!");
             }
         });
     }
