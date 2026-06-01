@@ -182,12 +182,14 @@ public class LandmarkActivity extends AppCompatActivity {
                         ref.getDownloadUrl().addOnSuccessListener(uri ->
                                 markAsConquered(userId, uri.toString()))
                         .addOnFailureListener(e -> {
-                            android.util.Log.e("CONQUEST", "Failed to get download URL", e);
-                            Toast.makeText(this, "Failed to get image link: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            android.util.Log.w("CONQUEST", "Failed to get download URL, falling back to local photo reference", e);
+                            Toast.makeText(this, "Using local link: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            markAsConquered(userId, photoUri.toString());
                         }))
                 .addOnFailureListener(e -> {
-                    android.util.Log.e("CONQUEST", "Failed to upload image", e);
-                    Toast.makeText(this, "Upload failed: " + e.getMessage() + "\nVerify Firebase Storage rules/bucket!", Toast.LENGTH_LONG).show();
+                    android.util.Log.w("CONQUEST", "Firebase Storage upload failed/disabled. Falling back to local reference to allow conquest!", e);
+                    Toast.makeText(this, "Firebase Storage offline/unpaid. Conquering using local photo reference! 📸🏆", Toast.LENGTH_LONG).show();
+                    markAsConquered(userId, photoUri.toString());
                 });
     }
 
