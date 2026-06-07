@@ -139,7 +139,7 @@ public class FriendsFragment extends Fragment {
                     if (snapshots.isEmpty()) {
                         foundUserId = null;
                         foundUsername = null;
-                        searchStatusText.setTextColor(0xFFE94560);
+                        searchStatusText.setTextColor(0xFFFF5252);
                         searchStatusText.setText("❌  No user found matching \"" + query + "\"");
                         return;
                     }
@@ -178,7 +178,7 @@ public class FriendsFragment extends Fragment {
                 .addOnFailureListener(e -> {
                     if (getContext() == null) return;
                     searchStatusText.setVisibility(View.VISIBLE);
-                    searchStatusText.setTextColor(0xFFE94560);
+                    searchStatusText.setTextColor(0xFFFF5252);
                     searchStatusText.setText("❌  Error: " + e.getMessage());
                 });
     }
@@ -232,7 +232,7 @@ public class FriendsFragment extends Fragment {
                     if (getContext() == null) return;
                     addFriendBtn.setEnabled(true);
                     searchStatusText.setVisibility(View.VISIBLE);
-                    searchStatusText.setTextColor(0xFFE94560);
+                    searchStatusText.setTextColor(0xFFFF5252);
                     searchStatusText.setText("❌  Failed: " + e.getMessage());
                 });
     }

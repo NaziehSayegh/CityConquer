@@ -42,7 +42,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
         android:text="My Friends"
-        android:textColor="#E94560"
+        android:textColor="@color/red_accent"
         android:textSize="18sp"
         android:textStyle="bold"/>
 

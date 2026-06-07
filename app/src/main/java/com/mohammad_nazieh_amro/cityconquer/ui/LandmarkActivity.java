@@ -48,7 +48,7 @@ public class LandmarkActivity extends AppCompatActivity {
 
     private TextView landmarkName, landmarkDescription, statusText;
     private ImageView landmarkImage;
-    private Button conquestBtn;
+    private Button conquestBtn, navigationBtn;
     private TextView distanceText, radiusText, xpAmountText, distanceLabel;
     private FrameLayout xpPopupOverlay;
     private LinearLayout xpPopup;
@@ -115,10 +115,31 @@ public class LandmarkActivity extends AppCompatActivity {
 
         conquestBtn.setOnClickListener(v -> checkLocationAndConquer());
 
+        navigationBtn = findViewById(R.id.navigation_btn);
+        navigationBtn.setOnClickListener(v -> navigateToLandmark());
+
         // Tap XP popup to dismiss
         xpPopupOverlay.setOnClickListener(v -> dismissXpPopup());
         // Tap level-up popup to dismiss
         levelupPopupOverlay.setOnClickListener(v -> dismissLevelupPopup());
+    }
+
+    private void navigateToLandmark() {
+        if (landmarkLat == 0 && landmarkLng == 0) {
+            Toast.makeText(this, "Coordinates not available!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Uri gmmIntentUri = Uri.parse("google.navigation:q=" + landmarkLat + "," + landmarkLng);
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps");
+        if (mapIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(mapIntent);
+        } else {
+            // Web maps fallback
+            Uri webMapsUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=" + landmarkLat + "," + landmarkLng);
+            Intent webIntent = new Intent(Intent.ACTION_VIEW, webMapsUri);
+            startActivity(webIntent);
+        }
     }
 
     private void checkIfAlreadyConquered() {

@@ -44,7 +44,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
         android:text="Development Team"
-        android:textColor="#E94560"
+        android:textColor="@color/red_accent"
         android:textSize="18sp"
         android:textStyle="bold"/>
 

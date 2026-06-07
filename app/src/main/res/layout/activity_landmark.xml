@@ -215,6 +215,20 @@
 
             </LinearLayout>
 
+            <!-- Navigation Button -->
+            <Button
+                android:id="@+id/navigation_btn"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/button_outline_background"
+                android:text="Navigate to Landmark 🗺️"
+                android:textColor="@color/accent"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:elevation="4dp"/>
+
             <!-- Conquest Button -->
             <Button
                 android:id="@+id/conquest_btn"
@@ -318,7 +332,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="LEVEL UP!"
-                android:textColor="#E94560"
+                android:textColor="@color/red_accent"
                 android:textSize="30sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.1"/>

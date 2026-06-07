@@ -1,5 +1,6 @@
 package com.mohammad_nazieh_amro.cityconquer.adapter;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.mohammad_nazieh_amro.cityconquer.R;
 import com.mohammad_nazieh_amro.cityconquer.model.User;
+import com.mohammad_nazieh_amro.cityconquer.ui.ProfileActivity;
 import java.util.List;
 
 public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHolder> {
@@ -35,6 +37,12 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
         holder.avatarInitial.setText(name.substring(0, 1).toUpperCase());
         holder.level.setText("Level " + friend.getLevel());
         holder.xp.setText(String.valueOf(friend.getTotalXP()));
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), ProfileActivity.class);
+            intent.putExtra("userId", friend.getId());
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override

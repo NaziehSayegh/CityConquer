@@ -4,14 +4,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/auth_bg_gradient">
 
-    <!-- Glowing center circle -->
-    <View
-        android:id="@+id/glow_circle"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="120dp"
-        android:background="@drawable/splash_glow_circle"/>
+
 
     <!-- Logo image -->
     <ImageView

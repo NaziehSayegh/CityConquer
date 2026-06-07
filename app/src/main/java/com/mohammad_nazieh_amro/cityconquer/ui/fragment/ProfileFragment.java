@@ -14,7 +14,8 @@ import com.mohammad_nazieh_amro.cityconquer.R;
 
 public class ProfileFragment extends Fragment {
 
-    private TextView usernameText, emailText, levelText, xpText, citiesText;
+    private TextView usernameText, emailText, levelText, xpText;
+    private TextView rankBadge, citiesCountText, landmarksCountText, friendsCountText;
     private FirebaseFirestore db;
     private String currentUserId;
 
@@ -26,11 +27,17 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         db = FirebaseFirestore.getInstance();
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        
         usernameText = view.findViewById(R.id.username_text);
         emailText = view.findViewById(R.id.email_text);
         levelText = view.findViewById(R.id.level_text);
         xpText = view.findViewById(R.id.xp_text);
-        citiesText = view.findViewById(R.id.cities_text);
+        
+        rankBadge = view.findViewById(R.id.rank_badge);
+        citiesCountText = view.findViewById(R.id.cities_count_text);
+        landmarksCountText = view.findViewById(R.id.landmarks_count_text);
+        friendsCountText = view.findViewById(R.id.friends_count_text);
+        
         loadProfile();
         return view;
     }
@@ -42,19 +49,39 @@ public class ProfileFragment extends Fragment {
                     if (documentSnapshot.exists()) {
                         String username = documentSnapshot.getString("username");
                         String email = documentSnapshot.getString("email");
-                        Long level = documentSnapshot.getLong("level");
-                        Long xp = documentSnapshot.getLong("totalXP");
+                        Long levelObj = documentSnapshot.getLong("level");
+                        Long xpObj = documentSnapshot.getLong("totalXP");
+                        int level = levelObj != null ? levelObj.intValue() : 1;
+                        int xp = xpObj != null ? xpObj.intValue() : 0;
+                        
+                        java.util.List<String> friendsList = (java.util.List<String>) documentSnapshot.get("friends");
+                        int friendsCount = friendsList != null ? friendsList.size() : 0;
+
                         usernameText.setText(username != null ? username : "Player");
                         emailText.setText(email != null ? email : "");
-                        levelText.setText("Level " + (level != null ? level : 1));
-                        xpText.setText((xp != null ? xp : 0) + " XP");
+                        
+                        levelText.setText(String.valueOf(level));
+                        xpText.setText(String.valueOf(xp));
+                        rankBadge.setText(com.mohammad_nazieh_amro.cityconquer.util.LevelSystem.getRankForLevel(level));
+                        friendsCountText.setText(String.valueOf(friendsCount));
                     }
                 });
 
         db.collection("users").document(currentUserId)
                 .collection("conquests")
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots ->
-                        citiesText.setText(queryDocumentSnapshots.size() + " Cities Explored"));
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    int citiesCount = queryDocumentSnapshots.size();
+                    citiesCountText.setText(String.valueOf(citiesCount));
+                    
+                    int totalLandmarksConquered = 0;
+                    for (var doc : queryDocumentSnapshots) {
+                        java.util.List<String> completedList = (java.util.List<String>) doc.get("completedLandmarks");
+                        if (completedList != null) {
+                            totalLandmarksConquered += completedList.size();
+                        }
+                    }
+                    landmarksCountText.setText(String.valueOf(totalLandmarksConquered));
+                });
     }
 }

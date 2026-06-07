@@ -86,4 +86,15 @@ public class LevelSystem {
         int nextLevelXP    = LEVEL_THRESHOLDS[currentLevel];
         return (float)(totalXP - currentLevelXP) / (nextLevelXP - currentLevelXP);
     }
+    /**
+     * Returns a dynamic rank title string based on user level.
+     */
+    public static String getRankForLevel(int level) {
+        if (level < 3) return "NOVICE EXPLORER 🧭";
+        if (level < 5) return "ROOKIE PATHFINDER 🗺️";
+        if (level < 7) return "SEASONED ADVENTURER 🎒";
+        if (level < 9) return "ELITE VOYAGER 🚀";
+        if (level < 10) return "MASTER CONQUEROR 👑";
+        return "LEGENDARY EXPLORER 🌟";
+    }
 }
