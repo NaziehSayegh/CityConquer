@@ -28,6 +28,7 @@ public class SplashActivity extends AppCompatActivity {
         ImageView logo = findViewById(R.id.logo);
         TextView appName = findViewById(R.id.app_name);
         TextView tagline = findViewById(R.id.tagline);
+        android.widget.LinearLayout authorsContainer = findViewById(R.id.authors_container);
 
         // Load and start animations
         Animation logoAnim = AnimationUtils.loadAnimation(this, R.anim.splash_logo_anim);
@@ -37,6 +38,7 @@ public class SplashActivity extends AppCompatActivity {
         logo.startAnimation(logoAnim);
         appName.startAnimation(textAnim);
         tagline.startAnimation(taglineAnim);
+        authorsContainer.startAnimation(taglineAnim);
 
         new Handler().postDelayed(() -> {
             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();

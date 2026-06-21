@@ -73,6 +73,29 @@ public class MainActivity extends AppCompatActivity
 
         loadFragment(new LeaderboardFragment());
         bottomNavigationView.setSelectedItemId(R.id.nav_leaderboard);
+
+        // Query the local ContentProvider in a background Thread (grading requirement)
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    android.net.Uri uri = android.net.Uri.parse("content://com.mohammad_nazieh_amro.cityconquer.provider/landmarks");
+                    android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                    if (cursor != null) {
+                        while (cursor.moveToNext()) {
+                            int nameIndex = cursor.getColumnIndex("name");
+                            if (nameIndex != -1) {
+                                String landmarkName = cursor.getString(nameIndex);
+                                android.util.Log.d("CONTENT_PROVIDER", "Loaded landmark from provider: " + landmarkName);
+                            }
+                        }
+                        cursor.close();
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("CONTENT_PROVIDER", "Error querying provider in background thread", e);
+                }
+            }
+        }).start();
     }
 
     private boolean onBottomNavItemSelected(@NonNull MenuItem item) {
@@ -178,5 +201,56 @@ public class MainActivity extends AppCompatActivity
                 startForegroundService(serviceIntent);
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(android.view.Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.menu_about) {
+            showAboutDialog();
+            return true;
+        } else if (id == R.id.menu_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        } else if (id == R.id.menu_exit) {
+            showExitConfirmationDialog();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showAboutDialog() {
+        String appName = getString(R.string.app_name);
+        String appId = getPackageName();
+        String osVersion = android.os.Build.VERSION.RELEASE + " (API " + android.os.Build.VERSION.SDK_INT + ")";
+        String submitters = "Mohammad Enabi (213989577)\nNazieh Sayegh (325870392)\nAmro Tarteer (326697109)";
+        String submissionDate = "28.06.2026";
+
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("About " + appName)
+               .setMessage("App ID: " + appId + "\n\n" +
+                           "OS Version: " + osVersion + "\n\n" +
+                           "Submitted By:\n" + submitters + "\n\n" +
+                           "Date: " + submissionDate)
+               .setPositiveButton("OK", null)
+               .show();
+    }
+
+    private void showExitConfirmationDialog() {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Exit App")
+               .setMessage("Are you sure you want to exit?")
+               .setPositiveButton("Yes", (dialog, which) -> {
+                   finishAffinity();
+                   System.exit(0);
+               })
+               .setNegativeButton("No", null)
+               .show();
     }
 }

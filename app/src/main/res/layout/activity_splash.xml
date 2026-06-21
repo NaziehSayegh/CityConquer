@@ -43,6 +43,52 @@
         android:textSize="12sp"
         android:letterSpacing="0.15"/>
 
+    <!-- Authors and submission date info (Required by final project rubric) -->
+    <LinearLayout
+        android:id="@+id/authors_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bottom_container"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mohammad Enabi · 213989577"
+            android:textColor="#B3FFFFFF"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Nazieh Sayegh · 325870392"
+            android:textColor="#B3FFFFFF"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Amro Tarteer · 326697109"
+            android:textColor="#B3FFFFFF"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Submission Date: 28.06.2026"
+            android:textColor="#00BCD4"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"/>
+
+    </LinearLayout>
+
     <!-- Bottom loading bar -->
     <LinearLayout
         android:id="@+id/bottom_container"
